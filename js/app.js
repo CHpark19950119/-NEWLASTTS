@@ -25,6 +25,53 @@ if (typeof Storage !== 'undefined') {
             return {};
         }
     };
+    
+    // 아카이브 추가 (기존 함수 없으면 추가)
+    if (!Storage.addArchive) {
+        Storage.addArchive = function(data) {
+            try {
+                const archives = JSON.parse(localStorage.getItem('archives') || '[]');
+                data.id = Date.now();
+                data.date = data.date || new Date().toISOString();
+                archives.unshift(data);
+                localStorage.setItem('archives', JSON.stringify(archives.slice(0, 100)));
+                console.log('✅ Storage.addArchive 성공:', data.id);
+                return true;
+            } catch (e) {
+                console.error('❌ Storage.addArchive 실패:', e);
+                return false;
+            }
+        };
+    }
+    
+    // 아카이브 가져오기
+    if (!Storage.getArchive) {
+        Storage.getArchive = function() {
+            try {
+                return JSON.parse(localStorage.getItem('archives') || '[]');
+            } catch (e) {
+                return [];
+            }
+        };
+    }
+    
+    // 아카이브 업데이트
+    if (!Storage.updateArchiveItem) {
+        Storage.updateArchiveItem = function(id, updates) {
+            try {
+                const archives = this.getArchive();
+                const index = archives.findIndex(a => a.id === id);
+                if (index !== -1) {
+                    archives[index] = { ...archives[index], ...updates };
+                    localStorage.setItem('archives', JSON.stringify(archives));
+                    return true;
+                }
+                return false;
+            } catch (e) {
+                return false;
+            }
+        };
+    }
 }
 
 // ========== 초기화 ==========
@@ -554,12 +601,48 @@ function finishTranslation() {
     const avg = completed > 0 ? Math.round(App.phraseFeedbacks.filter(f => !f.skipped).reduce((s, f) => s + f.score, 0) / completed) : 0;
     
     // 진행도 저장
-    Storage.saveArticleProgress(App.currentArticle.id, completed, App.phrases.length);
+    if (Storage.saveArticleProgress) {
+        Storage.saveArticleProgress(App.currentArticle.id, completed, App.phrases.length);
+    }
     
-    Storage.addArchive({ type: 'translation', articleId: App.currentArticle.id, articleTitle: App.currentArticle.title, totalPhrases: App.phrases.length, completedPhrases: completed, averageScore: avg, phraseFeedbacks: App.phraseFeedbacks, direction: App.translateDirection });
-    Storage.addGachaTicket(1);
+    // 아카이브 저장
+    const archiveData = { 
+        type: 'translation', 
+        articleId: App.currentArticle.id, 
+        articleTitle: App.currentArticle.title, 
+        totalPhrases: App.phrases.length, 
+        completedPhrases: completed, 
+        averageScore: avg, 
+        phraseFeedbacks: App.phraseFeedbacks, 
+        direction: App.translateDirection,
+        date: new Date().toISOString()
+    };
+    
+    console.log('💾 아카이브 저장:', archiveData);
+    
+    try {
+        if (typeof Storage !== 'undefined' && Storage.addArchive) {
+            Storage.addArchive(archiveData);
+        } else {
+            // 직접 localStorage에 저장
+            const archives = JSON.parse(localStorage.getItem('archives') || '[]');
+            archiveData.id = Date.now();
+            archives.unshift(archiveData);
+            localStorage.setItem('archives', JSON.stringify(archives.slice(0, 100)));
+            console.log('✅ 아카이브 직접 저장 완료');
+        }
+    } catch (e) {
+        console.error('❌ 아카이브 저장 실패:', e);
+    }
+    
+    // 가챠 티켓
+    if (Storage.addGachaTicket) {
+        Storage.addGachaTicket(1);
+    }
+    
     showToast('완료! 평균 ' + avg + '점, +1 티켓');
-    navigateTo('dashboard'); updateDashboard();
+    navigateTo('dashboard'); 
+    updateDashboard();
 }
 
 function addTermToVocab(en, ko) { Storage.addWord({ english: en, korean: ko }); showToast('"' + en + '" 추가됨'); }
@@ -692,13 +775,9 @@ function showInterpretText() {
 
 function nextInterpretStage() {
     InterpretApp.stage++;
-    if (InterpretApp.stage > 4) {
-        InterpretApp.stage = 1;
-        InterpretApp.phraseIndex++;
-        if (InterpretApp.phraseIndex >= App.phrases.length) {
-            finishInterpretation();
-            return;
-        }
+    if (InterpretApp.stage > 3) {
+        // 3단계(통역 입력) 다음은 submitInterpretation에서 처리
+        return;
     }
     updateInterpretStage();
     showInterpretPhrase();
@@ -723,65 +802,170 @@ function startInterpretTimer() {
 }
 
 async function submitInterpretation() {
-    const input = document.getElementById('interp-input')?.value.trim();
+    const inputEl = document.getElementById('interp-input');
+    const input = inputEl?.value.trim();
     if (!input) { showToast('통역 내용을 입력하세요', 'warning'); return; }
+    
+    // 입력값 저장 (에러 시 복구용)
+    const savedInput = input;
     
     InterpretApp.stage = 4;
     updateInterpretStage();
-    showInterpretPhrase();
     
-    showLoading(true, '통역 평가 중...');
+    const workspace = document.getElementById('interp-workspace');
+    const total = App.phrases.length;
+    const current = InterpretApp.phraseIndex + 1;
+    
+    workspace.innerHTML = `
+        <div class="interp-progress">
+            <span>${current} / ${total} 문장</span>
+            <div class="progress-bar"><div class="progress-fill" style="width:${(current/total)*100}%"></div></div>
+        </div>
+        <div class="interp-stage-content">
+            <div class="stage-box">
+                <h3>📊 4단계: 평가</h3>
+                <div id="interp-feedback" style="padding: 20px; text-align: center;">
+                    <div style="font-size: 24px; margin-bottom: 12px;">⏳</div>
+                    <p>AI 평가 중...</p>
+                    <p style="font-size: 12px; color: #888; margin-top: 8px;">잠시만 기다려주세요</p>
+                </div>
+            </div>
+        </div>
+    `;
+    
+    console.log('=== 통역 평가 시작 ===');
+    console.log('원문:', InterpretApp.currentPhrase?.en);
+    console.log('통역:', savedInput);
     
     try {
+        if (!InterpretApp.currentPhrase?.en) {
+            throw new Error('원문이 없습니다');
+        }
+        
         const fb = await API.getInterpretationFeedback(
             InterpretApp.currentPhrase.en, 
-            input, 
+            savedInput, 
             'en-ko', 
             false
         );
         
+        console.log('=== 평가 결과 ===', fb);
+        
         InterpretApp.results.push({
             original: InterpretApp.currentPhrase.en,
-            interpretation: input,
-            score: fb.score,
+            interpretation: savedInput,
+            score: fb?.score || 0,
             feedback: fb
         });
         
-        showLoading(false);
-        
-        document.getElementById('interp-feedback').innerHTML = `
-            <div class="feedback-score">
-                <span class="score-num">${fb.score}</span>
-                <span class="score-label">점</span>
-            </div>
-            <p class="feedback-main">${fb.feedback}</p>
-            ${fb.missedPoints?.length ? '<h4>❌ 누락된 내용</h4><ul>' + fb.missedPoints.map(p => '<li>' + p + '</li>').join('') + '</ul>' : ''}
-            ${fb.goodPoints?.length ? '<h4>✅ 잘한 점</h4><ul>' + fb.goodPoints.map(p => '<li>' + p + '</li>').join('') + '</ul>' : ''}
-            ${fb.modelInterpretation ? '<h4>📝 모범 통역</h4><div class="model-answer">' + fb.modelInterpretation + '</div>' : ''}
-            <button class="btn btn-primary" onclick="nextInterpretStage()" style="margin-top:16px;">
-                ${InterpretApp.phraseIndex < App.phrases.length - 1 ? '다음 문장 →' : '결과 보기 →'}
-            </button>
-        `;
+        const feedbackEl = document.getElementById('interp-feedback');
+        if (feedbackEl) {
+            feedbackEl.innerHTML = `
+                <div class="feedback-score" style="text-align: center; margin-bottom: 16px;">
+                    <span class="score-num" style="font-size: 48px; font-weight: bold; color: var(--accent-primary);">${fb?.score || 0}</span>
+                    <span class="score-label" style="font-size: 18px;">점</span>
+                </div>
+                <p class="feedback-main" style="padding: 12px; background: var(--bg-secondary); border-radius: 8px; margin-bottom: 16px;">${fb?.feedback || '평가 완료'}</p>
+                ${fb?.missedPoints?.length ? '<div style="margin-bottom: 12px;"><h4 style="margin-bottom: 8px;">❌ 누락된 내용</h4><ul style="padding-left: 20px;">' + fb.missedPoints.map(p => '<li>' + p + '</li>').join('') + '</ul></div>' : ''}
+                ${fb?.goodPoints?.length ? '<div style="margin-bottom: 12px;"><h4 style="margin-bottom: 8px;">✅ 잘한 점</h4><ul style="padding-left: 20px;">' + fb.goodPoints.map(p => '<li>' + p + '</li>').join('') + '</ul></div>' : ''}
+                ${fb?.modelInterpretation ? '<div style="margin-bottom: 16px;"><h4 style="margin-bottom: 8px;">📝 모범 통역</h4><div class="model-answer" style="padding: 12px; background: linear-gradient(135deg, rgba(102, 126, 234, 0.1) 0%, rgba(118, 75, 162, 0.1) 100%); border-radius: 8px; border-left: 4px solid var(--accent-primary);">' + fb.modelInterpretation + '</div></div>' : ''}
+                <button class="btn btn-primary" onclick="nextInterpretPhrase()" style="width: 100%; margin-top: 16px;">
+                    ${InterpretApp.phraseIndex < App.phrases.length - 1 ? '다음 문장 →' : '🎉 결과 보기'}
+                </button>
+            `;
+        }
     } catch (e) {
-        showLoading(false);
-        showToast('평가 실패: ' + e.message, 'error');
+        console.error('=== 통역 평가 오류 ===', e);
+        
+        InterpretApp.results.push({
+            original: InterpretApp.currentPhrase?.en || '',
+            interpretation: savedInput,
+            score: 0,
+            error: e.message
+        });
+        
+        const feedbackEl = document.getElementById('interp-feedback');
+        if (feedbackEl) {
+            feedbackEl.innerHTML = `
+                <div style="text-align: center; padding: 20px;">
+                    <div style="font-size: 48px; margin-bottom: 12px;">⚠️</div>
+                    <p style="color: #dc3545; font-weight: bold; margin-bottom: 8px;">평가 중 오류 발생</p>
+                    <p style="font-size: 12px; color: #666; margin-bottom: 16px;">${e.message}</p>
+                    <p style="background: var(--bg-secondary); padding: 12px; border-radius: 8px; margin-bottom: 16px;">
+                        <strong>내 통역:</strong> "${savedInput}"
+                    </p>
+                    <div style="display: flex; gap: 8px; justify-content: center;">
+                        <button class="btn btn-secondary" onclick="retryInterpretation('${savedInput.replace(/'/g, "\\'")}')">다시 시도</button>
+                        <button class="btn btn-ghost" onclick="nextInterpretPhrase()">건너뛰기</button>
+                    </div>
+                </div>
+            `;
+        }
     }
+}
+
+function retryInterpretation(savedInput) {
+    InterpretApp.stage = 3;
+    updateInterpretStage();
+    showInterpretPhrase();
+    // 저장된 입력값 복원
+    setTimeout(() => {
+        const inputEl = document.getElementById('interp-input');
+        if (inputEl) inputEl.value = savedInput;
+    }, 100);
+}
+
+function nextInterpretPhrase() {
+    InterpretApp.phraseIndex++;
+    if (InterpretApp.phraseIndex >= App.phrases.length) {
+        finishInterpretation();
+        return;
+    }
+    InterpretApp.stage = 1;
+    updateInterpretStage();
+    showInterpretPhrase();
 }
 
 function finishInterpretation() {
     const completed = InterpretApp.results.length;
-    const avg = completed > 0 ? Math.round(InterpretApp.results.reduce((s, r) => s + r.score, 0) / completed) : 0;
+    const avg = completed > 0 ? Math.round(InterpretApp.results.reduce((s, r) => s + (r.score || 0), 0) / completed) : 0;
     
-    Storage.addArchive({ 
+    const archiveData = { 
         type: 'interpretation', 
-        articleId: App.currentArticle.id, 
-        articleTitle: App.currentArticle.title, 
+        articleId: App.currentArticle?.id,
+        articleTitle: App.currentArticle?.title || '제목 없음', 
         totalPhrases: App.phrases.length, 
         completedPhrases: completed, 
         averageScore: avg, 
-        results: InterpretApp.results 
-    });
-    Storage.addGachaTicket(1);
+        results: InterpretApp.results,
+        date: new Date().toISOString()
+    };
+    
+    console.log('💾 통역 아카이브 저장:', archiveData);
+    
+    try {
+        if (typeof Storage !== 'undefined' && Storage.addArchive) {
+            Storage.addArchive(archiveData);
+        } else {
+            // 직접 localStorage에 저장
+            const archives = JSON.parse(localStorage.getItem('archives') || '[]');
+            archiveData.id = Date.now();
+            archives.unshift(archiveData);
+            localStorage.setItem('archives', JSON.stringify(archives.slice(0, 100)));
+        }
+        console.log('✅ 통역 아카이브 저장 완료');
+    } catch (e) {
+        console.error('❌ 통역 아카이브 저장 실패:', e);
+    }
+    
+    try {
+        if (Storage.addGachaTicket) {
+            Storage.addGachaTicket(1);
+        }
+    } catch (e) {
+        console.error('가챠 티켓 추가 실패:', e);
+    }
+    
     showToast('통역 완료! 평균 ' + avg + '점, +1 티켓');
     navigateTo('dashboard'); 
     updateDashboard();
