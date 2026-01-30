@@ -8,8 +8,8 @@
   "keywords": [],
   "author": "",
   "license": "ISC",
-  "description": "",
   "dependencies": {
     "node-fetch": "^2.7.0"
-  }
+  },
+  "description": ""
 }
