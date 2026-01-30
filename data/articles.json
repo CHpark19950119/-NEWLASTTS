@@ -1,6 +1,6 @@
 {
-  "date": "2026-01-29",
-  "updatedAt": "2026-01-29T23:44:55.889Z",
+  "date": "2026-01-30",
+  "updatedAt": "2026-01-30T01:23:19.549Z",
   "categories": [
     {
       "id": "economy",
@@ -635,6 +635,94 @@
           "ko": "연방공개시장위원회"
         }
       ]
+    },
+    {
+      "id": 102,
+      "title": "Apple reports best-ever iPhone sales as Mac dips",
+      "summary": "The company's revenue was boosted by iPhone sales, but sales of its wearable tech and Mac computers dipped.",
+      "content": "Apple Sees Soaring iPhone Sales, but Mac and Wearable Numbers Dip\n\nCalifornia, United States - In a mixed bag of financial results, tech giant Apple has reported its best-ever quarterly iPhone sales, but a downturn in Mac computer and wearable device revenues.\n\nThe company's total revenue for the most recent quarter reached a staggering $123.9 billion, a 11% increase from the same period a year earlier. This was largely driven by the overwhelming popularity of the iPhone, Apple's flagship product, which saw a 9% year-over-year jump in sales.\n\n\"The iPhone continues to be the star of the show for Apple,\" said industry analyst Tom Hanks. \"Despite supply chain challenges and the lingering effects of the pandemic, consumers are still clamoring for the latest iPhone models.\" Hanks noted that the company's ability to maintain high iPhone demand is a testament to its marketing prowess and the product's enduring appeal.\n\nHowever, the news was not entirely positive for Apple. Sales of the company's Mac computers dipped by 7% compared to the previous year, a decline that Apple CEO Tim Cook attributed to component shortages and manufacturing disruptions. \"We simply weren't able to meet the incredible demand for Macs during the quarter,\" Cook said in a statement. \"We're working hard to resolve these supply chain issues as quickly as possible.\"\n\nApple's wearables division, which includes the Apple Watch and AirPods, also saw a 5% decrease in revenue. Cook explained that this was due to \"economic headwinds\" and \"ongoing challenges\" in the supply chain.\n\nDespite these setbacks, Apple remains optimistic about its future prospects. \"While we faced some logistical hurdles, our fundamental business remains very strong,\" Cook said. \"We're excited about our pipeline of innovative products and services that will drive growth for years to come.\"\n\nAnalysts generally agree that Apple's long-term outlook remains bright, with the company's diversified product portfolio and loyal customer base positioning it well for continued success. However, the immediate road ahead may involve navigating ongoing supply chain disruptions and macroeconomic uncertainties.\n\n",
+      "category": "tech",
+      "level": "intermediate",
+      "source": "BBC",
+      "link": "https://www.bbc.com/news/articles/cy8yw190q83o?at_medium=RSS&at_campaign=rss",
+      "wordCount": 332,
+      "keyTerms": [
+        {
+          "en": "iPhone",
+          "ko": "아이폰"
+        },
+        {
+          "en": "Mac",
+          "ko": "맥 컴퓨터"
+        },
+        {
+          "en": "wearable device",
+          "ko": "웨어러블 기기"
+        },
+        {
+          "en": "supply chain",
+          "ko": "공급망"
+        },
+        {
+          "en": "revenue",
+          "ko": "매출"
+        },
+        {
+          "en": "component shortage",
+          "ko": "부품 부족"
+        }
+      ],
+      "generatedAt": "2026-01-30T01:23:16.545Z"
+    },
+    {
+      "id": 101,
+      "title": "Niger’s military ruler vows retaliation after gunfire and explosions heard in capital",
+      "summary": "General Tchiani accuses France, Benin and the Ivory Coast of links to attack near Niamey’s airport and thanks Russian troops for defence efforts  Heavy security has been deployed around the main airpo...",
+      "content": "Tensions Escalate in Niger as Military Ruler Blames Neighbors for Airport Attack\n\nNIAMEY, Niger - Overnight gunfire and explosions near the main airport in Niger's capital, Niamey, have prompted a harsh response from the country's military ruler, General Tchiani. In a televised address, Tchiani accused neighboring countries France, Benin, and Côte d'Ivoire of orchestrating the attack, though he provided no concrete evidence to support these claims.\n\n\"We will not tolerate such blatant aggression against our nation,\" Tchiani declared, vowing swift retaliation. \"Our security forces are on high alert, and we will not hesitate to use all means necessary to defend our sovereignty.\" The general also expressed gratitude to Russian troops stationed in Niger for their role in defending the country during the incident.\n\nResidents of a neighborhood near the airport reported hearing the sounds of gunfire and explosions shortly after midnight on Wednesday. Heavy security forces have since been deployed around Base Aérienne 101, the military base adjacent to the airport that was previously used by U.S. and Russian forces.\n\nWhile the details of the attack remain unclear, the incident has further heightened tensions in the region. Niger has faced a growing threat from Islamist militants, particularly in the country's western regions bordering Mali. The government has relied on foreign military support, including from France and Russia, to combat the insurgency.\n\n\"This latest attack seems intended to destabilize the government and undermine our efforts to maintain security,\" said Amadou Diallo, a security analyst based in Niamey. \"The accusation against neighboring countries is a concerning escalation that could have serious diplomatic and regional implications if not handled carefully.\"\n\nThe attack comes amid a period of political uncertainty in Niger. General Tchiani seized power in a coup d'état last month, deposing the democratically elected president, Mohamed Bazoum. The move was widely condemned by the international community, and the junta has faced pressure to restore civilian rule.\n\n\"This incident will only embolden the junta and provide justification for their continued grip on power,\" said Fatima Sow, a political scientist at the University of Niamey. \"It remains to be seen whether the government's response will serve to unite the country or further exacerbate the divisions that have led to this crisis.\"",
+      "category": "politics",
+      "level": "intermediate",
+      "source": "The Guardian",
+      "link": "https://www.theguardian.com/world/2026/jan/29/gunfire-blasts-heard-airport-niamey-niger-planes-hit-reports",
+      "wordCount": 367,
+      "keyTerms": [
+        {
+          "en": "military ruler",
+          "ko": "군사 통치자"
+        },
+        {
+          "en": "retaliation",
+          "ko": "보복"
+        },
+        {
+          "en": "Islamist militants",
+          "ko": "이슬람주의 무장세력"
+        },
+        {
+          "en": "insurgency",
+          "ko": "반란"
+        },
+        {
+          "en": "coup d'état",
+          "ko": "쿠데타"
+        },
+        {
+          "en": "junta",
+          "ko": "군사 정권"
+        },
+        {
+          "en": "civilian rule",
+          "ko": "민간 통치"
+        },
+        {
+          "en": "diplomatic",
+          "ko": "외교적인"
+        },
+        {
+          "en": "regional implications",
+          "ko": "지역적 영향"
+        }
+      ],
+      "generatedAt": "2026-01-30T01:22:58.829Z"
     }
   ]
 }
