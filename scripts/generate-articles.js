@@ -1,73 +1,75 @@
-// ===== 기사 자동 생성 스크립트 (GPT 직접 생성) =====
+// ===== 기사 자동 생성 스크립트 (NewsAPI + GPT 확장) =====
 const fetch = require('node-fetch');
 const fs = require('fs');
 const path = require('path');
 
 const OPENAI_API_KEY = process.env.OPENAI_API_KEY;
+const NEWS_API_KEY = process.env.NEWS_API_KEY || '31c8561e2d334252b9c6a06d5a30702a';
 
-// 기사 주제 템플릿 (RSS 대신 사용)
-const ARTICLE_TOPICS = [
-  { category: 'economy', topics: [
-    '중앙은행 금리 정책과 인플레이션',
-    '글로벌 공급망 변화와 무역',
-    '주요국 GDP 성장률 전망',
-    '원자재 가격 동향과 시장 영향',
-    '기업 실적 발표와 주식시장'
-  ]},
-  { category: 'politics', topics: [
-    '국제 정상회담과 외교 관계',
-    '지역 안보 협력과 동맹',
-    '국제기구 정책 결정',
-    '선거와 정치 변화',
-    '국제 제재와 외교적 대응'
-  ]},
-  { category: 'tech', topics: [
-    'AI 기술 발전과 산업 적용',
-    '반도체 산업 경쟁과 공급',
-    '사이버 보안 위협과 대응',
-    '빅테크 기업 규제 동향',
-    '신재생 에너지 기술 혁신'
-  ]},
-  { category: 'health', topics: [
-    '신약 개발과 임상시험 결과',
-    '공중보건 정책과 예방',
-    '의료 시스템 개혁 논의',
-    '글로벌 건강 위기 대응',
-    '바이오테크 산업 동향'
-  ]}
+// NewsAPI 카테고리 매핑
+const CATEGORIES = [
+  { newsapi: 'business', local: 'economy', name: '경제' },
+  { newsapi: 'technology', local: 'tech', name: '기술' },
+  { newsapi: 'health', local: 'health', name: '보건' },
+  { newsapi: 'science', local: 'science', name: '과학' }
 ];
 
-async function generateArticle(category, topic) {
-  const prompt = `You are a Reuters/Bloomberg professional journalist writing for Korean translation exam preparation.
+// NewsAPI에서 뉴스 가져오기
+async function fetchNewsAPI(category) {
+  try {
+    const url = `https://newsapi.org/v2/top-headlines?category=${category}&language=en&pageSize=3&apiKey=${NEWS_API_KEY}`;
+    
+    const response = await fetch(url);
+    const data = await response.json();
+    
+    if (data.status !== 'ok') {
+      console.error(`NewsAPI error: ${data.message}`);
+      return [];
+    }
+    
+    return data.articles.filter(a => a.title && a.description && a.title !== '[Removed]').map(a => ({
+      title: a.title,
+      description: a.description,
+      source: a.source?.name || 'News',
+      url: a.url
+    }));
+  } catch (error) {
+    console.error(`NewsAPI fetch error: ${error.message}`);
+    return [];
+  }
+}
 
-Generate a REALISTIC news article about: "${topic}"
-Category: ${category}
+// GPT로 기사 본문 확장 + 한국어 번역 생성
+async function expandArticle(title, description, category) {
+  const prompt = `You are a professional news editor and translator.
 
-CRITICAL REQUIREMENTS:
-1. Write 350-450 words in formal journalistic English
-2. Create REALISTIC but FICTIONAL details:
-   - Use plausible organization names (e.g., "Federal Reserve", "World Bank", "IMF")
-   - Use realistic but generic expert names (e.g., "Dr. Sarah Chen, economist at...")
-   - Include believable statistics and figures
-   - Use recent-sounding dates (January 2026)
-3. Structure: Lead paragraph → Background → Expert quote → Analysis → Outlook
-4. Use advanced vocabulary suitable for translation exams:
-   - Economic terms: fiscal policy, monetary easing, inflationary pressure
-   - Political terms: bilateral relations, diplomatic channels, multilateral framework
-   - Technical terms: leverage, benchmark, trajectory, implications
+Based on this real news:
+- Title: "${title}"
+- Summary: "${description}"
+- Category: ${category}
 
-ALSO provide Korean translation for bilingual practice.
+TASK 1: Expand into a full 350-450 word English news article
+- Use formal journalistic style (Reuters/Bloomberg level)
+- Structure: Lead → Background → Analysis → Expert perspective → Outlook
+- Include realistic details, statistics, expert quotes
+- Use advanced vocabulary for translation exam preparation
+
+TASK 2: Translate the ENTIRE article to Korean
+- Professional translation quality (통번역대학원 수준)
+- Natural Korean, not translationese
+
+TASK 3: Extract 5 key terms for vocabulary study
 
 Respond with JSON only (no markdown):
 {
-  "title": "Article headline in English",
+  "title": "${title}",
   "content": "Full English article (350-450 words)",
-  "koreanContent": "전체 한국어 번역 (기사 전문)",
-  "summary": "2-3 sentence summary",
+  "koreanContent": "전체 한국어 번역",
+  "summary": "${description}",
   "level": "advanced",
   "keyTerms": [
-    {"en": "monetary policy", "ko": "통화 정책"},
-    {"en": "fiscal stimulus", "ko": "재정 부양책"},
+    {"en": "term1", "ko": "용어1"},
+    {"en": "term2", "ko": "용어2"},
     {"en": "term3", "ko": "용어3"},
     {"en": "term4", "ko": "용어4"},
     {"en": "term5", "ko": "용어5"}
@@ -75,8 +77,6 @@ Respond with JSON only (no markdown):
 }`;
 
   try {
-    console.log(`  Generating article about: ${topic}`);
-    
     const response = await fetch('https://api.openai.com/v1/chat/completions', {
       method: 'POST',
       headers: {
@@ -86,40 +86,41 @@ Respond with JSON only (no markdown):
       body: JSON.stringify({
         model: 'gpt-4o-mini',
         messages: [{ role: 'user', content: prompt }],
-        max_tokens: 3000,
-        temperature: 0.8
+        max_tokens: 3500,
+        temperature: 0.7
       })
     });
 
     if (!response.ok) {
       const errorText = await response.text();
-      console.error('API Error:', errorText);
+      console.error('OpenAI API Error:', errorText);
       return null;
     }
 
     const data = await response.json();
     const text = data.choices?.[0]?.message?.content || '';
     
-    // JSON 추출 (마크다운 코드블록 제거)
+    // 토큰 사용량 로그
+    if (data.usage) {
+      console.log(`  📊 Tokens used: ${data.usage.total_tokens} (prompt: ${data.usage.prompt_tokens}, completion: ${data.usage.completion_tokens})`);
+    }
+    
+    // JSON 추출
     let cleanText = text.replace(/```json\n?/g, '').replace(/```\n?/g, '').trim();
     const jsonMatch = cleanText.match(/\{[\s\S]*\}/);
     
     if (jsonMatch) {
-      const parsed = JSON.parse(jsonMatch[0]);
-      console.log(`  ✅ Generated: ${parsed.title?.substring(0, 50)}...`);
-      return parsed;
-    } else {
-      console.error('  ❌ Failed to parse JSON from response');
-      return null;
+      return JSON.parse(jsonMatch[0]);
     }
+    return null;
   } catch (error) {
-    console.error('  ❌ Generation error:', error.message);
+    console.error('Article expansion error:', error.message);
     return null;
   }
 }
 
 async function main() {
-  console.log('📰 Starting article generation (GPT Direct Mode)...\n');
+  console.log('📰 Starting article generation (NewsAPI + GPT)...\n');
   
   if (!OPENAI_API_KEY) {
     console.error('❌ OPENAI_API_KEY not set!');
@@ -131,7 +132,7 @@ async function main() {
   
   try {
     existingData = JSON.parse(fs.readFileSync(articlesPath, 'utf8'));
-    console.log(`📂 Loaded existing data: ${existingData.articles.length} articles\n`);
+    console.log(`📂 Existing articles: ${existingData.articles.length}\n`);
   } catch (e) {
     console.log('📂 Creating new articles.json\n');
   }
@@ -141,7 +142,8 @@ async function main() {
     { id: 'economy', name: '경제', icon: '💰' },
     { id: 'politics', name: '정치/외교', icon: '🌍' },
     { id: 'tech', name: '기술', icon: '💻' },
-    { id: 'health', name: '보건', icon: '🏥' }
+    { id: 'health', name: '보건', icon: '🏥' },
+    { id: 'science', name: '과학', icon: '🔬' }
   ];
   
   existingData.levels = [
@@ -153,44 +155,53 @@ async function main() {
   const newArticles = [];
   let articleId = Math.max(0, ...existingData.articles.map(a => a.id || 0)) + 1;
   
-  // 각 카테고리에서 랜덤 주제 선택하여 기사 생성
-  for (const categoryData of ARTICLE_TOPICS) {
-    console.log(`\n📁 Category: ${categoryData.category.toUpperCase()}`);
+  // 각 카테고리에서 기사 가져오기
+  for (const cat of CATEGORIES) {
+    console.log(`\n📁 Category: ${cat.name} (${cat.newsapi})`);
     
-    // 랜덤 주제 선택
-    const randomIndex = Math.floor(Math.random() * categoryData.topics.length);
-    const topic = categoryData.topics[randomIndex];
+    const news = await fetchNewsAPI(cat.newsapi);
     
-    const article = await generateArticle(categoryData.category, topic);
+    if (news.length === 0) {
+      console.log('  ⚠️ No news found, skipping...');
+      continue;
+    }
     
-    if (article && article.content) {
+    // 첫 번째 기사만 처리
+    const item = news[0];
+    console.log(`  📄 Processing: ${item.title.substring(0, 50)}...`);
+    
+    const expanded = await expandArticle(item.title, item.description, cat.name);
+    
+    if (expanded && expanded.content) {
       newArticles.push({
         id: articleId++,
-        title: article.title,
-        summary: article.summary || article.content.substring(0, 150) + '...',
-        content: article.content,
-        koreanContent: article.koreanContent || '',
-        category: categoryData.category,
-        level: article.level || 'advanced',
-        source: 'AI Generated',
-        keyTerms: article.keyTerms || [],
-        wordCount: article.content.split(/\s+/).length,
+        title: expanded.title || item.title,
+        summary: expanded.summary || item.description,
+        content: expanded.content,
+        koreanContent: expanded.koreanContent || '',
+        category: cat.local,
+        level: expanded.level || 'advanced',
+        source: item.source,
+        sourceUrl: item.url,
+        keyTerms: expanded.keyTerms || [],
+        wordCount: expanded.content.split(/\s+/).length,
         generatedAt: new Date().toISOString()
       });
+      console.log(`  ✅ Added article #${articleId - 1}`);
     }
     
     // API 레이트 리밋 방지
-    await new Promise(r => setTimeout(r, 3000));
+    await new Promise(r => setTimeout(r, 2000));
   }
   
-  // 새 기사를 맨 앞에 추가 (최대 100개 유지)
+  // 새 기사를 맨 앞에 추가
   existingData.articles = [...newArticles, ...existingData.articles].slice(0, 100);
   
   // 저장
   fs.writeFileSync(articlesPath, JSON.stringify(existingData, null, 2));
   
   console.log(`\n${'='.repeat(50)}`);
-  console.log(`✅ Complete! Generated ${newArticles.length} new articles.`);
+  console.log(`✅ Generated ${newArticles.length} new articles`);
   console.log(`📊 Total articles: ${existingData.articles.length}`);
   console.log(`${'='.repeat(50)}`);
 }

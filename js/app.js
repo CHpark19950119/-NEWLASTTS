@@ -73,7 +73,8 @@ function loadUserData() {
     document.getElementById('streak-count').textContent = streak.count;
     document.getElementById('streak-best').textContent = '최고: ' + streak.best + '일';
     const settings = Storage.getSettings();
-    document.getElementById('time-goal').textContent = settings.dailyGoal;
+    const timeGoal = document.getElementById('time-goal');
+    if (timeGoal) timeGoal.textContent = settings.dailyGoal;
     document.getElementById('quiz-best').textContent = Storage.getGameBest('quiz');
     document.getElementById('typing-best').textContent = Storage.getGameBest('typing');
     document.getElementById('matching-best').textContent = Storage.getGameBest('matching') || '-';
@@ -114,7 +115,7 @@ function navigateTo(view) {
     else if (view === 'settings') loadSettings();
 }
 
-// ========== TTS (토글) ==========
+// ========== TTS ==========
 function speakText(text, rate) { 
     TTS.speak(text, 'en-US', rate || Storage.getSettings().ttsSpeed || 0.9); 
 }
@@ -147,9 +148,12 @@ function updateDashboard() {
     const dashTime = document.getElementById('dash-time');
     if (dashTime) dashTime.textContent = daily.time || 0;
     const vocab = Storage.getVocabulary();
-    document.getElementById('dv-total').textContent = vocab.length;
-    document.getElementById('dv-mastered').textContent = vocab.filter(w => w.mastered).length;
-    document.getElementById('dv-review').textContent = Storage.getReviewWords().length;
+    const dvTotal = document.getElementById('dv-total');
+    if (dvTotal) dvTotal.textContent = vocab.length;
+    const dvMastered = document.getElementById('dv-mastered');
+    if (dvMastered) dvMastered.textContent = vocab.filter(w => w.mastered).length;
+    const dvReview = document.getElementById('dv-review');
+    if (dvReview) dvReview.textContent = Storage.getReviewWords().length;
     const profile = Storage.getProfile();
     document.getElementById('mascot-big').textContent = profile.mascot;
     document.getElementById('mascot-name-display').textContent = profile.mascotName;
@@ -164,14 +168,18 @@ function updateRecommended() {
     if (!App.articles.length) return;
     const history = Storage.getHistory().filter(h => h.type === 'article').map(h => h.articleId);
     const a = App.articles.find(x => !history.includes(x.id)) || App.articles[0];
+    if (!a) return;
     const cat = App.categories.find(c => c.id === a.category) || { icon: '📰', name: a.category };
     const lv = App.levels.find(l => l.id === a.level) || { icon: '📚', name: a.level };
     document.getElementById('rec-cat').textContent = cat.icon + ' ' + cat.name;
     document.getElementById('rec-level').textContent = lv.icon + ' ' + lv.name;
     document.getElementById('rec-title').textContent = a.title;
-    document.getElementById('rec-source').textContent = a.source || '';
-    document.getElementById('rec-date').textContent = formatDate(a.generatedAt);
-    document.getElementById('rec-new').textContent = a.id > 100 ? '🤖' : '';
+    const recSource = document.getElementById('rec-source');
+    if (recSource) recSource.textContent = a.source || '';
+    const recDate = document.getElementById('rec-date');
+    if (recDate) recDate.textContent = formatDate(a.generatedAt);
+    const recNew = document.getElementById('rec-new');
+    if (recNew) recNew.textContent = a.id > 100 ? '🤖' : '';
     App.recommendedArticle = a;
 }
 
@@ -236,7 +244,8 @@ function renderArticles() {
     grid.innerHTML = list.map(a => {
         const ci = App.categories.find(c => c.id === a.category) || { icon: '📰', name: a.category };
         const li = App.levels.find(l => l.id === a.level) || { icon: '📚', name: a.level };
-        return '<div class="article-card" onclick="selectArticle(' + a.id + ')"><div class="article-meta"><span>' + ci.icon + ' ' + ci.name + '</span><span>' + li.icon + ' ' + li.name + '</span>' + (a.id > 100 ? '<span class="badge-new">🤖</span>' : '') + '</div><h4>' + a.title + '</h4><p>' + (a.summary || a.content?.substring(0, 100) + '...') + '</p><div class="article-footer"><span>' + (a.source || '') + '</span><span>' + (a.wordCount || '-') + '단어</span></div></div>';
+        const hasKorean = a.koreanContent ? '🇰🇷' : '';
+        return '<div class="article-card" onclick="selectArticle(' + a.id + ')"><div class="article-meta"><span>' + ci.icon + ' ' + ci.name + '</span><span>' + li.icon + ' ' + li.name + '</span>' + (hasKorean ? '<span title="한영 번역 가능">🇰🇷</span>' : '') + '</div><h4>' + a.title + '</h4><p>' + (a.summary || a.content?.substring(0, 100) + '...') + '</p><div class="article-footer"><span>' + (a.source || '') + '</span><span>' + (a.wordCount || '-') + '단어</span></div></div>';
     }).join('');
 }
 
@@ -262,15 +271,11 @@ function setupTranslation(a) {
     document.getElementById('trans-level').textContent = li.icon + ' ' + li.name;
     document.getElementById('trans-title').textContent = a.title;
     
-    // 영어 문장 분리
     const enContent = a.content || '';
     const enSentences = enContent.match(/[^.!?]+[.!?]+/g) || [enContent];
-    
-    // 한국어 문장 분리 (있으면)
     const koContent = a.koreanContent || '';
     const koSentences = koContent ? (koContent.match(/[^.!?。]+[.!?。]+/g) || [koContent]) : [];
     
-    // 영어/한국어 쌍으로 저장
     App.phrases = enSentences.map((s, i) => ({ 
         en: s.trim(), 
         ko: koSentences[i]?.trim() || '' 
@@ -278,6 +283,18 @@ function setupTranslation(a) {
     
     App.phraseIndex = 0; 
     App.phraseFeedbacks = [];
+    
+    // 한영 버튼 활성화/비활성화
+    const koEnBtn = document.querySelector('.dir-btn[data-dir="ko-en"]');
+    if (koEnBtn) {
+        if (koContent) {
+            koEnBtn.disabled = false;
+            koEnBtn.title = '한영 번역 가능';
+        } else {
+            koEnBtn.disabled = true;
+            koEnBtn.title = '한국어 원문 없음';
+        }
+    }
     
     if (a.keyTerms?.length) {
         document.getElementById('key-terms-list').innerHTML = a.keyTerms.map(t => 
@@ -289,12 +306,16 @@ function setupTranslation(a) {
     updatePhraseDisplay();
 }
 
-// ========== 한영/영한 전환 ==========
 function setTranslateDirection(dir) {
+    // 한영인데 한국어 원문 없으면 경고
+    if (dir === 'ko-en' && App.phrases.length > 0 && !App.phrases[0].ko) {
+        showToast('이 기사는 한국어 원문이 없어 한영 번역을 지원하지 않습니다', 'warning');
+        return;
+    }
+    
     App.translateDirection = dir;
     document.querySelectorAll('.dir-btn').forEach(b => b.classList.toggle('active', b.dataset.dir === dir));
     
-    // 플레이스홀더 업데이트
     const input = document.getElementById('trans-input');
     if (dir === 'en-ko') {
         input.placeholder = '한국어로 번역하세요...';
@@ -316,62 +337,38 @@ function updatePhraseDisplay() {
     document.getElementById('trans-progress-text').textContent = cur + ' / ' + total;
     document.getElementById('phrase-num').textContent = cur;
     
-    // ★ 핵심: 방향에 따라 원문 표시
     if (App.translateDirection === 'en-ko') {
-        // 영한: 영어 원문 보여주고 → 한국어로 번역
         document.getElementById('phrase-text').textContent = p.en;
     } else {
-        // 한영: 한국어 원문 보여주고 → 영어로 번역
-        // 한국어가 없으면 영어로 대체 (기사에 한국어 번역이 없는 경우)
-        if (p.ko) {
-            document.getElementById('phrase-text').textContent = p.ko;
-        } else {
-            document.getElementById('phrase-text').textContent = '(한국어 원문 없음) ' + p.en;
-            showToast('이 기사는 한영 번역을 지원하지 않습니다', 'warning');
-        }
+        document.getElementById('phrase-text').textContent = p.ko || p.en;
     }
     
     document.getElementById('trans-input').value = '';
     document.getElementById('feedback-area').style.display = 'none';
 }
 
-// ========== 첨삭 (GPT / Claude 선택) ==========
-async function submitWithGPT() {
-    await submitTranslation(false);
-}
-
-async function submitWithClaude() {
-    await submitTranslation(true);
-}
+// ========== 첨삭 ==========
+async function submitWithGPT() { await submitTranslation(false); }
+async function submitWithClaude() { await submitTranslation(true); }
 
 async function submitTranslation(usePremium = false) {
     const input = document.getElementById('trans-input').value.trim();
     if (!input) { showToast('번역을 입력해주세요', 'warning'); return; }
     
-    const modelName = usePremium ? 'Claude Sonnet 4' : 'GPT-5 mini';
+    const modelName = usePremium ? 'Claude Sonnet 4' : 'GPT-4o-mini';
     showLoading(true, modelName + ' 첨삭 중...');
     
     const p = App.phrases[App.phraseIndex];
-    
-    // 방향에 따라 원문 선택
     const orig = App.translateDirection === 'en-ko' ? p.en : (p.ko || p.en);
     
     try {
         const fb = await API.getTranslationFeedback(orig, input, App.translateDirection, usePremium);
-        App.phraseFeedbacks.push({ 
-            original: orig, 
-            userTranslation: input, 
-            feedback: fb, 
-            score: fb.score, 
-            model: modelName 
-        });
+        App.phraseFeedbacks.push({ original: orig, userTranslation: input, feedback: fb, score: fb.score, model: modelName });
         
-        // 모델 뱃지
         const modelBadge = usePremium 
             ? '<span class="model-badge premium">✨ Claude Sonnet 4</span>' 
-            : '<span class="model-badge gpt">🚀 GPT-5 mini</span>';
+            : '<span class="model-badge gpt">🚀 GPT-4o-mini</span>';
         
-        // 상세 분석 표시
         let analysisHtml = '';
         if (fb.analysis) {
             analysisHtml = '<div class="analysis-section">';
@@ -409,12 +406,7 @@ async function submitTranslation(usePremium = false) {
 }
 
 function skipPhrase() { 
-    App.phraseFeedbacks.push({ 
-        original: App.phrases[App.phraseIndex].en, 
-        userTranslation: '', 
-        score: 0, 
-        skipped: true 
-    }); 
+    App.phraseFeedbacks.push({ original: App.phrases[App.phraseIndex].en, userTranslation: '', score: 0, skipped: true }); 
     nextPhrase(); 
 }
 
@@ -427,48 +419,45 @@ function nextPhrase() {
 function finishTranslation() {
     const completed = App.phraseFeedbacks.filter(f => !f.skipped).length;
     const avg = completed > 0 ? Math.round(App.phraseFeedbacks.filter(f => !f.skipped).reduce((s, f) => s + f.score, 0) / completed) : 0;
-    Storage.addArchive({ 
-        type: 'translation', 
-        articleId: App.currentArticle.id, 
-        articleTitle: App.currentArticle.title, 
-        totalPhrases: App.phrases.length, 
-        completedPhrases: completed, 
-        averageScore: avg, 
-        phraseFeedbacks: App.phraseFeedbacks, 
-        direction: App.translateDirection 
-    });
+    Storage.addArchive({ type: 'translation', articleId: App.currentArticle.id, articleTitle: App.currentArticle.title, totalPhrases: App.phrases.length, completedPhrases: completed, averageScore: avg, phraseFeedbacks: App.phraseFeedbacks, direction: App.translateDirection });
     Storage.addGachaTicket(1);
     showToast('완료! 평균 ' + avg + '점, +1 티켓');
-    navigateTo('dashboard'); 
-    updateDashboard();
+    navigateTo('dashboard'); updateDashboard();
 }
 
-function addTermToVocab(en, ko) { 
-    Storage.addWord({ english: en, korean: ko }); 
-    showToast('"' + en + '" 추가됨'); 
+function addTermToVocab(en, ko) { Storage.addWord({ english: en, korean: ko }); showToast('"' + en + '" 추가됨'); }
+
+// ========== 기사 업데이트 ==========
+function openArticleUpdateModal() {
+    document.getElementById('article-update-modal').classList.add('active');
+    document.getElementById('update-form-area').style.display = 'none';
+    document.getElementById('update-form-area').innerHTML = '';
 }
 
-// ========== 기사 업데이트 (GitHub Actions 트리거) ==========
-async function triggerArticleUpdate() {
+function closeArticleUpdateModal() {
+    document.getElementById('article-update-modal').classList.remove('active');
+}
+
+// RSS/NewsAPI 자동 수집
+async function updateFromRSS() {
     if (!App.githubToken) {
-        const token = prompt('GitHub Personal Access Token을 입력하세요:\n(Settings → Developer settings → Personal access tokens에서 발급)\n\n처음 한 번만 입력하면 저장됩니다.');
+        const token = prompt('GitHub Personal Access Token을 입력하세요:\n(Settings → Developer settings → Personal access tokens)');
         if (!token) return;
         App.githubToken = token;
         Storage.set('githubToken', token);
     }
     
-    showLoading(true, 'GitHub Actions 트리거 중...');
+    showLoading(true, 'GitHub Actions 실행 중...');
     
     try {
         const success = await API.triggerArticleUpdate(App.githubToken, App.githubOwner, App.githubRepo);
-        
         showLoading(false);
         
         if (success) {
-            showToast('✅ 기사 업데이트가 시작되었습니다! 3-5분 후 새로고침하세요.', 'success');
+            showToast('✅ 기사 업데이트 시작! 3-5분 후 새로고침하세요.', 'success');
             closeArticleUpdateModal();
         } else {
-            showToast('❌ 업데이트 요청 실패. 토큰을 확인해주세요.', 'error');
+            showToast('❌ 실패. 토큰 확인 필요', 'error');
             App.githubToken = null;
             Storage.remove('githubToken');
         }
@@ -478,16 +467,134 @@ async function triggerArticleUpdate() {
     }
 }
 
-function updateFromRSS() {
-    triggerArticleUpdate();
+// URL에서 기사 추가
+function updateFromURL() {
+    const formArea = document.getElementById('update-form-area');
+    formArea.style.display = 'block';
+    formArea.innerHTML = `
+        <div class="form-group">
+            <label>뉴스 기사 URL</label>
+            <input type="url" id="article-url" placeholder="https://..." style="width:100%;padding:12px;border-radius:8px;border:1px solid var(--border-color);">
+        </div>
+        <button class="btn btn-primary" onclick="processArticleURL()" style="margin-top:12px;">
+            🔍 기사 추출 및 추가
+        </button>
+    `;
 }
 
-function openArticleUpdateModal() {
-    document.getElementById('article-update-modal').classList.add('active');
+async function processArticleURL() {
+    const url = document.getElementById('article-url').value.trim();
+    if (!url) { showToast('URL을 입력하세요', 'warning'); return; }
+    
+    showLoading(true, 'URL에서 기사 추출 중...');
+    
+    try {
+        const article = await API.extractArticleFromURL(url);
+        
+        if (article && article.content) {
+            // 로컬에 기사 추가
+            const newId = Math.max(0, ...App.articles.map(a => a.id || 0)) + 1;
+            const newArticle = {
+                id: newId,
+                title: article.title,
+                summary: article.summary,
+                content: article.content,
+                koreanContent: article.koreanContent || '',
+                category: article.category || 'economy',
+                level: article.level || 'advanced',
+                source: 'URL Import',
+                sourceUrl: url,
+                keyTerms: article.keyTerms || [],
+                wordCount: article.content.split(/\s+/).length,
+                generatedAt: new Date().toISOString()
+            };
+            
+            App.articles.unshift(newArticle);
+            
+            // 로컬 스토리지에 저장
+            Storage.set('customArticles', App.articles.filter(a => a.source === 'URL Import' || a.source === 'Manual Input'));
+            
+            showLoading(false);
+            showToast('✅ 기사 추가 완료!', 'success');
+            closeArticleUpdateModal();
+            renderArticles();
+        } else {
+            throw new Error('기사 추출 실패');
+        }
+    } catch (e) {
+        showLoading(false);
+        showToast('❌ 추출 실패: ' + e.message, 'error');
+    }
 }
 
-function closeArticleUpdateModal() {
-    document.getElementById('article-update-modal').classList.remove('active');
+// 직접 입력
+function updateManual() {
+    const formArea = document.getElementById('update-form-area');
+    formArea.style.display = 'block';
+    formArea.innerHTML = `
+        <div class="form-group">
+            <label>기사 제목</label>
+            <input type="text" id="manual-title" placeholder="제목 입력" style="width:100%;padding:12px;border-radius:8px;border:1px solid var(--border-color);">
+        </div>
+        <div class="form-group">
+            <label>기사 내용</label>
+            <textarea id="manual-content" placeholder="기사 본문을 붙여넣으세요..." style="width:100%;height:200px;padding:12px;border-radius:8px;border:1px solid var(--border-color);resize:vertical;"></textarea>
+        </div>
+        <div class="form-group">
+            <label>언어</label>
+            <select id="manual-lang" style="padding:12px;border-radius:8px;border:1px solid var(--border-color);">
+                <option value="en">영어 기사</option>
+                <option value="ko">한국어 기사</option>
+            </select>
+        </div>
+        <button class="btn btn-primary" onclick="processManualArticle()" style="margin-top:12px;">
+            ✨ 기사 변환 및 추가
+        </button>
+    `;
+}
+
+async function processManualArticle() {
+    const title = document.getElementById('manual-title').value.trim();
+    const content = document.getElementById('manual-content').value.trim();
+    const lang = document.getElementById('manual-lang').value;
+    
+    if (!title || !content) { showToast('제목과 내용을 입력하세요', 'warning'); return; }
+    
+    showLoading(true, '기사 변환 중...');
+    
+    try {
+        const article = await API.createArticleFromText(title, content, lang === 'ko');
+        
+        if (article && article.content) {
+            const newId = Math.max(0, ...App.articles.map(a => a.id || 0)) + 1;
+            const newArticle = {
+                id: newId,
+                title: article.title,
+                summary: article.summary,
+                content: article.content,
+                koreanContent: article.koreanContent || '',
+                category: article.category || 'economy',
+                level: article.level || 'advanced',
+                source: 'Manual Input',
+                keyTerms: article.keyTerms || [],
+                wordCount: article.content.split(/\s+/).length,
+                generatedAt: new Date().toISOString()
+            };
+            
+            App.articles.unshift(newArticle);
+            Storage.set('customArticles', App.articles.filter(a => a.source === 'URL Import' || a.source === 'Manual Input'));
+            
+            showLoading(false);
+            showToast('✅ 기사 추가 완료!', 'success');
+            closeArticleUpdateModal();
+            renderArticles();
+        } else {
+            throw new Error('변환 실패');
+        }
+    } catch (e) {
+        showLoading(false);
+        showToast('❌ 변환 실패: ' + e.message, 'error');
+    }
 }
 
 // ========== 단어장 ==========
@@ -518,21 +625,8 @@ function addWord() {
     showToast('단어 추가됨');
 }
 
-function toggleStar(id) { 
-    const w = Storage.getVocabulary().find(x => x.id === id); 
-    if (w) { 
-        Storage.updateWord(id, { starred: !w.starred }); 
-        renderVocab(document.querySelector('.tab-btn.active')?.dataset.tab || 'today'); 
-    } 
-}
-
-function deleteWord(id) { 
-    if (confirm('삭제?')) { 
-        Storage.deleteWord(id); 
-        renderVocab(document.querySelector('.tab-btn.active')?.dataset.tab || 'today'); 
-        showToast('삭제됨'); 
-    } 
-}
+function toggleStar(id) { const w = Storage.getVocabulary().find(x => x.id === id); if (w) { Storage.updateWord(id, { starred: !w.starred }); renderVocab(document.querySelector('.tab-btn.active')?.dataset.tab || 'today'); } }
+function deleteWord(id) { if (confirm('삭제?')) { Storage.deleteWord(id); renderVocab(document.querySelector('.tab-btn.active')?.dataset.tab || 'today'); showToast('삭제됨'); } }
 
 // ========== 게임 ==========
 function startGame(type) {
@@ -556,17 +650,10 @@ function updateGachaTickets() {
     const t = Storage.getGachaTickets();
     const el = document.getElementById('gacha-tickets');
     if (el) el.textContent = t;
-    const m = document.getElementById('gacha-tickets-modal'); 
-    if (m) m.textContent = t;
+    const m = document.getElementById('gacha-tickets-modal'); if (m) m.textContent = t;
 }
 
-function openGacha() { 
-    document.getElementById('gacha-modal').classList.add('active'); 
-    document.getElementById('gacha-tickets-modal').textContent = Storage.getGachaTickets(); 
-    document.getElementById('gacha-result').style.display = 'none'; 
-    document.getElementById('gacha-ball').textContent = '?'; 
-}
-
+function openGacha() { document.getElementById('gacha-modal').classList.add('active'); document.getElementById('gacha-tickets-modal').textContent = Storage.getGachaTickets(); document.getElementById('gacha-result').style.display = 'none'; document.getElementById('gacha-ball').textContent = '?'; }
 function closeGacha() { document.getElementById('gacha-modal').classList.remove('active'); }
 
 function pullGacha() {
@@ -603,10 +690,7 @@ function openArchive(id) {
     App.currentArchiveId = id;
     document.getElementById('am-title').textContent = (a.type === 'translation' ? '✍️ 번역' : '🎙️ 통역') + ' - ' + a.articleTitle;
     let body = '<div style="margin-bottom:16px"><p>총 ' + (a.totalPhrases || 0) + '문장 중 ' + (a.completedPhrases || 0) + '문장 완료</p><p>평균 점수: <strong>' + (a.averageScore || 0) + '</strong>점</p></div>';
-    if (a.phraseFeedbacks?.length) { 
-        body += '<h4>📝 문장별 첨삭</h4>'; 
-        body += a.phraseFeedbacks.map((f, i) => '<div style="padding:12px;background:var(--bg-tertiary);border-radius:8px;margin-bottom:8px"><strong>' + (i + 1) + '.</strong> "' + f.original + '"<br><span style="color:var(--text-secondary)">내 번역: ' + (f.userTranslation || '(건너뜀)') + '</span><br><span style="color:var(--accent-primary)">점수: ' + (f.score || 0) + '점' + (f.model ? ' (' + f.model + ')' : '') + '</span></div>').join(''); 
-    }
+    if (a.phraseFeedbacks?.length) { body += '<h4>📝 문장별 첨삭</h4>'; body += a.phraseFeedbacks.map((f, i) => '<div style="padding:12px;background:var(--bg-tertiary);border-radius:8px;margin-bottom:8px"><strong>' + (i + 1) + '.</strong> "' + f.original + '"<br><span style="color:var(--text-secondary)">내 번역: ' + (f.userTranslation || '(건너뜀)') + '</span><br><span style="color:var(--accent-primary)">점수: ' + (f.score || 0) + '점' + (f.model ? ' (' + f.model + ')' : '') + '</span></div>').join(''); }
     document.getElementById('am-body').innerHTML = body;
     document.getElementById('am-memo').value = a.memo || '';
     document.getElementById('archive-modal').classList.add('active');
@@ -643,21 +727,9 @@ function loadCustomizeSettings() {
     renderStickerCollection();
 }
 
-function selectMascot(m) { 
-    document.getElementById('mascot-preview').textContent = m; 
-    document.querySelectorAll('.mascot-opt').forEach(b => b.classList.toggle('active', b.dataset.mascot === m)); 
-}
-
-function setTheme(t) { 
-    document.documentElement.setAttribute('data-theme', t); 
-    document.querySelectorAll('.theme-opt').forEach(b => b.classList.toggle('active', b.dataset.theme === t)); 
-    if (typeof Achievements !== 'undefined') Achievements.check('special', { achievementId: 'customizer' }); 
-}
-
-function toggleEffect(e) { 
-    const el = document.querySelector('.bg-' + (e === 'particles' ? 'particles' : e)); 
-    if (el) el.classList.toggle('hidden'); 
-}
+function selectMascot(m) { document.getElementById('mascot-preview').textContent = m; document.querySelectorAll('.mascot-opt').forEach(b => b.classList.toggle('active', b.dataset.mascot === m)); }
+function setTheme(t) { document.documentElement.setAttribute('data-theme', t); document.querySelectorAll('.theme-opt').forEach(b => b.classList.toggle('active', b.dataset.theme === t)); if (typeof Achievements !== 'undefined') Achievements.check('special', { achievementId: 'customizer' }); }
+function toggleEffect(e) { const el = document.querySelector('.bg-' + (e === 'particles' ? 'particles' : e)); if (el) el.classList.toggle('hidden'); }
 
 function renderStickerCollection() {
     const owned = Storage.getStickers();
@@ -667,22 +739,8 @@ function renderStickerCollection() {
 }
 
 function saveCustomization() {
-    const p = { 
-        nickname: document.getElementById('custom-nickname').value || 'DAYOUNG', 
-        studioName: document.getElementById('custom-studio').value || "'s Studio", 
-        mascot: document.getElementById('mascot-preview').textContent || '🦜', 
-        mascotName: document.getElementById('mascot-name-input').value || '파랑이', 
-        theme: document.querySelector('.theme-opt.active')?.dataset.theme || 'light', 
-        effects: { 
-            particles: document.getElementById('effect-particles').checked, 
-            gradient: document.getElementById('effect-gradient').checked, 
-            pattern: document.getElementById('effect-pattern').checked 
-        } 
-    };
-    Storage.saveProfile(p); 
-    initProfile(); 
-    initTheme(); 
-    showToast('저장됨');
+    const p = { nickname: document.getElementById('custom-nickname').value || 'DAYOUNG', studioName: document.getElementById('custom-studio').value || "'s Studio", mascot: document.getElementById('mascot-preview').textContent || '🦜', mascotName: document.getElementById('mascot-name-input').value || '파랑이', theme: document.querySelector('.theme-opt.active')?.dataset.theme || 'light', effects: { particles: document.getElementById('effect-particles').checked, gradient: document.getElementById('effect-gradient').checked, pattern: document.getElementById('effect-pattern').checked } };
+    Storage.saveProfile(p); initProfile(); initTheme(); showToast('저장됨');
 }
 
 // ========== 설정 ==========
@@ -693,13 +751,14 @@ function loadSettings() {
     document.getElementById('tts-speed-val').textContent = (s.ttsSpeed || 0.9) + 'x';
 }
 
+// ★ 설정 저장 함수 (이 함수가 없었음!)
 function saveSettings() {
     const settings = {
         dailyGoal: parseInt(document.getElementById('set-goal').value) || 60,
         ttsSpeed: parseFloat(document.getElementById('set-tts-speed').value) || 0.9
     };
     Storage.saveSettings(settings);
-    showToast('설정 저장됨');
+    showToast('✅ 설정이 저장되었습니다!', 'success');
 }
 
 function resetGithubToken() {
@@ -708,145 +767,36 @@ function resetGithubToken() {
     showToast('GitHub 토큰 초기화됨');
 }
 
-function saveDday() { 
-    const n = document.getElementById('set-dday-name').value; 
-    const d = document.getElementById('set-dday-date').value; 
-    if (n && d) { Storage.saveDday(n, d); updateDdayDisplay(); showToast('D-Day 설정됨'); } 
-}
-
-function saveDiary() { 
-    Storage.saveDiary(document.getElementById('diary-text').value); 
-    showToast('일기 저장됨'); 
-}
-
-function exportData() { 
-    const d = Storage.exportData(); 
-    const b = new Blob([d], { type: 'application/json' }); 
-    const a = document.createElement('a'); 
-    a.href = URL.createObjectURL(b); 
-    a.download = 'dayoung_backup.json'; 
-    a.click(); 
-    showToast('내보내기됨'); 
-}
-
-function importData() { 
-    const i = document.createElement('input'); 
-    i.type = 'file'; 
-    i.accept = '.json'; 
-    i.onchange = async (e) => { 
-        const f = e.target.files[0]; 
-        if (f) { 
-            const t = await f.text(); 
-            if (Storage.importData(t)) { 
-                showToast('가져오기됨'); 
-                location.reload(); 
-            } else showToast('실패', 'error'); 
-        } 
-    }; 
-    i.click(); 
-}
-
-function resetData() { 
-    if (confirm('모든 데이터 삭제?')) { 
-        Storage.resetAll(); 
-        location.reload(); 
-    } 
-}
+function saveDday() { const n = document.getElementById('set-dday-name').value; const d = document.getElementById('set-dday-date').value; if (n && d) { Storage.saveDday(n, d); updateDdayDisplay(); showToast('D-Day 설정됨'); } }
+function saveDiary() { Storage.saveDiary(document.getElementById('diary-text').value); showToast('일기 저장됨'); }
+function exportData() { const d = Storage.exportData(); const b = new Blob([d], { type: 'application/json' }); const a = document.createElement('a'); a.href = URL.createObjectURL(b); a.download = 'dayoung_backup.json'; a.click(); showToast('내보내기됨'); }
+function importData() { const i = document.createElement('input'); i.type = 'file'; i.accept = '.json'; i.onchange = async (e) => { const f = e.target.files[0]; if (f) { const t = await f.text(); if (Storage.importData(t)) { showToast('가져오기됨'); location.reload(); } else showToast('실패', 'error'); } }; i.click(); }
+function resetData() { if (confirm('모든 데이터 삭제?')) { Storage.resetAll(); location.reload(); } }
 
 // ========== 운세 ==========
-function checkDailyFortune() { 
-    const l = Storage.getLastFortune(); 
-    if (l.date !== new Date().toDateString()) setTimeout(() => showFortune(), 2000); 
-}
-
-function showFortune() { 
-    if (typeof Fortune === 'undefined') return;
-    const f = Fortune.get(); 
-    document.getElementById('fortune-result').textContent = f.text; 
-    document.getElementById('fortune-word').textContent = f.word; 
-    document.getElementById('fortune-modal').classList.add('active'); 
-}
-
-function closeFortuneModal() { 
-    document.getElementById('fortune-modal').classList.remove('active'); 
-    if (typeof Fortune !== 'undefined') {
-        const f = Fortune.get(); 
-        document.getElementById('fortune-text').textContent = f.text; 
-    }
-    document.getElementById('fortune-banner').style.display = 'flex'; 
-}
-
-function closeFortune() { 
-    document.getElementById('fortune-banner').style.display = 'none'; 
-}
+function checkDailyFortune() { const l = Storage.getLastFortune(); if (l.date !== new Date().toDateString()) setTimeout(() => showFortune(), 2000); }
+function showFortune() { if (typeof Fortune === 'undefined') return; const f = Fortune.get(); document.getElementById('fortune-result').textContent = f.text; document.getElementById('fortune-word').textContent = f.word; document.getElementById('fortune-modal').classList.add('active'); }
+function closeFortuneModal() { document.getElementById('fortune-modal').classList.remove('active'); if (typeof Fortune !== 'undefined') { const f = Fortune.get(); document.getElementById('fortune-text').textContent = f.text; } document.getElementById('fortune-banner').style.display = 'flex'; }
+function closeFortune() { document.getElementById('fortune-banner').style.display = 'none'; }
 
 // ========== 모달 ==========
-function showBadgeUnlock(a) { 
-    document.getElementById('badge-unlock-icon').textContent = a.icon; 
-    document.getElementById('badge-unlock-name').textContent = a.name; 
-    document.getElementById('badge-unlock-desc').textContent = a.desc; 
-    document.getElementById('badge-modal').classList.add('active'); 
-}
-
-function closeBadgeModal() { 
-    document.getElementById('badge-modal').classList.remove('active'); 
-}
-
-function showLevelUp(n) { 
-    document.getElementById('levelup-num').textContent = n; 
-    document.getElementById('levelup-title').textContent = Storage.getTitleForLevel(n); 
-    document.getElementById('levelup-modal').classList.add('active'); 
-    if (typeof Achievements !== 'undefined') {
-        if (n >= 5) Achievements.check('special', { achievementId: 'level_5' }); 
-        if (n >= 10) Achievements.check('special', { achievementId: 'level_10' }); 
-    }
-}
-
-function closeLevelupModal() { 
-    document.getElementById('levelup-modal').classList.remove('active'); 
-}
+function showBadgeUnlock(a) { document.getElementById('badge-unlock-icon').textContent = a.icon; document.getElementById('badge-unlock-name').textContent = a.name; document.getElementById('badge-unlock-desc').textContent = a.desc; document.getElementById('badge-modal').classList.add('active'); }
+function closeBadgeModal() { document.getElementById('badge-modal').classList.remove('active'); }
+function showLevelUp(n) { document.getElementById('levelup-num').textContent = n; document.getElementById('levelup-title').textContent = Storage.getTitleForLevel(n); document.getElementById('levelup-modal').classList.add('active'); if (typeof Achievements !== 'undefined') { if (n >= 5) Achievements.check('special', { achievementId: 'level_5' }); if (n >= 10) Achievements.check('special', { achievementId: 'level_10' }); } }
+function closeLevelupModal() { document.getElementById('levelup-modal').classList.remove('active'); }
 
 // ========== BGM ==========
-function toggleBGM() { 
-    document.getElementById('bgm-controls').classList.toggle('active'); 
-}
-
-function changeBGM() { 
-    const t = document.getElementById('bgm-select').value; 
-    if (t) { 
-        BGM.play(t); 
-        document.getElementById('bgm-icon').textContent = '🔊'; 
-    } else { 
-        BGM.stop(); 
-        document.getElementById('bgm-icon').textContent = '🔇'; 
-    } 
-}
-
-function setBGMVolume() { 
-    BGM.setVolume(document.getElementById('bgm-volume').value); 
-}
+function toggleBGM() { document.getElementById('bgm-controls').classList.toggle('active'); }
+function changeBGM() { const t = document.getElementById('bgm-select').value; if (t) { BGM.play(t); document.getElementById('bgm-icon').textContent = '🔊'; } else { BGM.stop(); document.getElementById('bgm-icon').textContent = '🔇'; } }
+function setBGMVolume() { BGM.setVolume(document.getElementById('bgm-volume').value); }
 
 // ========== 파티클 ==========
-function createParticles() { 
-    const c = document.getElementById('particles'); 
-    if (!c) return; 
-    for (let i = 0; i < 20; i++) { 
-        const p = document.createElement('div'); 
-        p.className = 'particle'; 
-        p.style.left = Math.random() * 100 + '%'; 
-        p.style.top = Math.random() * 100 + '%'; 
-        p.style.animationDelay = Math.random() * 15 + 's'; 
-        p.style.animationDuration = (10 + Math.random() * 10) + 's'; 
-        c.appendChild(p); 
-    } 
-}
+function createParticles() { const c = document.getElementById('particles'); if (!c) return; for (let i = 0; i < 20; i++) { const p = document.createElement('div'); p.className = 'particle'; p.style.left = Math.random() * 100 + '%'; p.style.top = Math.random() * 100 + '%'; p.style.animationDelay = Math.random() * 15 + 's'; p.style.animationDuration = (10 + Math.random() * 10) + 's'; c.appendChild(p); } }
 
 // ========== 유틸 ==========
 function showLoading(s, msg) { 
     const el = document.getElementById('loading');
     el.style.display = s ? 'flex' : 'none'; 
-    
-    // 로딩 메시지 업데이트
     let textEl = el.querySelector('.loading-text');
     if (msg && s) {
         if (!textEl) {
@@ -861,16 +811,5 @@ function showLoading(s, msg) {
         textEl.textContent = '로딩중...';
     }
 }
-
-function showToast(m, t) { 
-    const to = document.createElement('div'); 
-    to.className = 'toast ' + (t || 'success'); 
-    to.textContent = m; 
-    document.getElementById('toasts').appendChild(to); 
-    setTimeout(() => to.remove(), 3000); 
-}
-
-function refreshArticles() { 
-    showToast('새로고침...'); 
-    loadArticles(); 
-}
+function showToast(m, t) { const to = document.createElement('div'); to.className = 'toast ' + (t || 'success'); to.textContent = m; document.getElementById('toasts').appendChild(to); setTimeout(() => to.remove(), 3000); }
+function refreshArticles() { showToast('새로고침...'); loadArticles(); }

@@ -7,6 +7,8 @@ const API = {
     // GPT 호출 (gpt-4o-mini)
     async callGPT(prompt, systemPrompt = '') {
         try {
+            console.log('🚀 Calling GPT API...');
+            
             const response = await fetch(this.PROXY_URL, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -22,22 +24,29 @@ const API = {
             });
             
             const data = await response.json();
-            console.log('GPT Response:', data);
+            console.log('📥 GPT Response received:', data);
+            
+            // 토큰 사용량 로그
+            if (data.usage) {
+                console.log(`📊 Tokens: ${data.usage.total_tokens} (prompt: ${data.usage.prompt_tokens}, completion: ${data.usage.completion_tokens})`);
+            }
             
             // 에러 체크
             if (data.error) {
+                console.error('❌ GPT Error:', data.error);
                 throw new Error(data.error.message || JSON.stringify(data.error));
             }
             
             // 응답 형식 체크
             if (!data.choices || !data.choices[0] || !data.choices[0].message) {
-                console.error('Unexpected GPT response format:', data);
-                throw new Error('GPT 응답 형식 오류: ' + JSON.stringify(data).substring(0, 200));
+                console.error('❌ Unexpected response format:', data);
+                throw new Error('GPT 응답 형식 오류');
             }
             
+            console.log('✅ GPT call successful');
             return data.choices[0].message.content;
         } catch (error) {
-            console.error('callGPT error:', error);
+            console.error('❌ callGPT error:', error);
             throw error;
         }
     },
@@ -45,6 +54,8 @@ const API = {
     // Claude 프리미엄 호출 (claude-sonnet-4)
     async callClaude(prompt, systemPrompt = '') {
         try {
+            console.log('🚀 Calling Claude API...');
+            
             const response = await fetch(this.PROXY_URL, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -59,27 +70,29 @@ const API = {
             });
             
             const data = await response.json();
-            console.log('Claude Response:', data);
+            console.log('📥 Claude Response received:', data);
             
             // 에러 체크
             if (data.error) {
+                console.error('❌ Claude Error:', data.error);
                 throw new Error(data.error.message || JSON.stringify(data.error));
             }
             
             // 응답 형식 체크
             if (!data.content || !data.content[0] || !data.content[0].text) {
-                console.error('Unexpected Claude response format:', data);
-                throw new Error('Claude 응답 형식 오류: ' + JSON.stringify(data).substring(0, 200));
+                console.error('❌ Unexpected response format:', data);
+                throw new Error('Claude 응답 형식 오류');
             }
             
+            console.log('✅ Claude call successful');
             return data.content[0].text;
         } catch (error) {
-            console.error('callClaude error:', error);
+            console.error('❌ callClaude error:', error);
             throw error;
         }
     },
     
-    // 번역 첨삭 요청 (모델 선택 가능) - 매우 상세한 프롬프트
+    // 번역 첨삭 요청 (매우 상세한 프롬프트)
     async getTranslationFeedback(original, userTranslation, direction = 'en-ko', usePremium = false) {
         const sourceLang = direction === 'en-ko' ? '영어' : '한국어';
         const targetLang = direction === 'en-ko' ? '한국어' : '영어';
@@ -98,59 +111,37 @@ const API = {
 ═══════════════════════════════════════════
 📊 평가 기준 (100점 만점)
 ═══════════════════════════════════════════
-1. 정확성 (35점)
-   - 오역(mistranslation): 의미가 잘못 전달된 부분
-   - 누락(omission): 원문의 내용 중 빠진 부분  
-   - 첨가(addition): 원문에 없는 내용이 추가된 부분
-   
-2. 자연스러움 (25점)
-   - 번역투(translationese): 어색한 직역체 표현
-   - 어순/문장 구조: 목표 언어에 맞는 자연스러운 어순
-   - 연어(collocation): 자연스러운 단어 조합
-   
-3. 용어 선택 (20점)
-   - 문맥 적합성: 해당 분야에 맞는 적절한 용어
-   - 일관성: 같은 개념에 일관된 번역어 사용
-   - 뉘앙스: 원문의 tone/register 반영
-   
-4. 문체/스타일 (20점)
-   - 격식체/비격식체 일치
-   - 문장 길이 및 복잡도 적절성
-   - 전체적인 가독성
+1. 정확성 (35점): 오역/누락/첨가 여부
+2. 자연스러움 (25점): 번역투, 어순, 연어
+3. 용어 선택 (20점): 문맥 적합성, 뉘앙스
+4. 문체/스타일 (20점): 격식체 일치, 가독성
 
 ═══════════════════════════════════════════
-⚠️ 평가 지침
+⚠️ 채점 기준
 ═══════════════════════════════════════════
-- 50점 이하: 심각한 오역, 의미 전달 실패
-- 51-65점: 기본 의미는 전달되나 여러 문제
+- 50점 이하: 심각한 오역
+- 51-65점: 기본 의미 전달되나 문제 많음
 - 66-75점: 양호하나 개선 필요
-- 76-85점: 좋음, 세부 표현 개선 여지
-- 86-95점: 매우 좋음, 전문가 수준
-- 96-100점: 완벽에 가까움
+- 76-85점: 좋음
+- 86-95점: 매우 좋음
+- 96-100점: 완벽
 
-═══════════════════════════════════════════
-📋 응답 형식 (JSON)
-═══════════════════════════════════════════
 다음 JSON 형식으로만 응답하세요:
 {
   "score": 점수(0-100),
-  "feedback": "종합 평가 (3-4문장으로 전체적인 번역의 질과 주요 문제점 설명)",
+  "feedback": "종합 평가 (3-4문장)",
   "analysis": {
-    "accuracy": "정확성 분석: 오역/누락/첨가 여부를 구체적으로 지적",
-    "naturalness": "자연스러움 분석: 번역투나 어색한 표현 지적",
-    "terminology": "용어 분석: 부적절한 용어 선택 지적",
-    "style": "문체 분석: 스타일 관련 문제점"
+    "accuracy": "정확성 분석",
+    "naturalness": "자연스러움 분석",
+    "terminology": "용어 분석",
+    "style": "문체 분석"
   },
   "improvements": [
-    "【구체적 개선점 1】 '학습자가 쓴 표현' → '더 나은 표현' (이유 설명)",
-    "【구체적 개선점 2】 '학습자가 쓴 표현' → '더 나은 표현' (이유 설명)",
-    "【구체적 개선점 3】 '학습자가 쓴 표현' → '더 나은 표현' (이유 설명)"
+    "【개선점 1】 '원래 표현' → '개선 표현' (이유)",
+    "【개선점 2】 '원래 표현' → '개선 표현' (이유)"
   ],
-  "goodPoints": [
-    "잘한 점 1 (구체적인 표현 언급)",
-    "잘한 점 2 (구체적인 표현 언급)"
-  ],
-  "modelAnswer": "모범 번역 (자연스럽고 정확한 전문가 수준의 번역)"
+  "goodPoints": ["잘한 점 1", "잘한 점 2"],
+  "modelAnswer": "모범 번역"
 }`;
 
         try {
@@ -166,7 +157,7 @@ const API = {
             console.error('Feedback error:', error);
             return {
                 score: 0,
-                feedback: 'AI 첨삭을 가져올 수 없습니다: ' + error.message,
+                feedback: 'AI 첨삭 오류: ' + error.message,
                 analysis: {},
                 improvements: [],
                 goodPoints: [],
@@ -175,82 +166,85 @@ const API = {
         }
     },
     
-    // 통역 평가 요청
-    async getInterpretationFeedback(original, userInterpretation, direction = 'en-ko', usePremium = false) {
-        const prompt = `당신은 통번역대학원 교수로서 학생의 통역을 엄격하게 평가합니다.
+    // URL에서 기사 추출 및 변환
+    async extractArticleFromURL(url) {
+        const prompt = `다음 URL의 뉴스 기사를 분석하여 통번역 학습용 자료로 만들어주세요.
 
-【원문】
-"${original}"
+URL: ${url}
 
-【학습자 통역】
-"${userInterpretation}"
+작업:
+1. 기사 제목과 본문을 영어로 작성 (350-450 단어)
+2. 전문적인 한국어 번역 제공
+3. 핵심 용어 5개 추출
 
-다음 JSON 형식으로만 응답하세요:
+JSON 형식으로 응답:
 {
-  "score": 0-100,
-  "feedback": "전체 평가 (유창성, 정확성, 완성도를 3-4문장으로)",
-  "missedPoints": ["누락된 내용 1", "누락된 내용 2"],
-  "goodPoints": ["잘한 점 1", "잘한 점 2"],
-  "modelInterpretation": "모범 통역"
+  "title": "영어 제목",
+  "content": "영어 본문 (350-450 words)",
+  "koreanContent": "한국어 번역 전문",
+  "summary": "2-3문장 요약",
+  "category": "economy|politics|tech|health|science",
+  "level": "advanced",
+  "keyTerms": [
+    {"en": "term", "ko": "용어"}
+  ]
 }`;
 
         try {
-            const response = usePremium 
-                ? await this.callClaude(prompt)
-                : await this.callGPT(prompt);
+            const response = await this.callGPT(prompt);
             const jsonMatch = response.match(/\{[\s\S]*\}/);
             if (jsonMatch) {
                 return JSON.parse(jsonMatch[0]);
             }
-            throw new Error('응답 파싱 실패');
+            throw new Error('기사 추출 실패');
         } catch (error) {
-            console.error('Interpretation feedback error:', error);
-            return {
-                score: 0,
-                feedback: 'AI 평가를 가져올 수 없습니다: ' + error.message,
-                missedPoints: [],
-                goodPoints: [],
-                modelInterpretation: ''
-            };
+            console.error('URL extraction error:', error);
+            return null;
         }
     },
     
-    // 기사 생성 (gpt-5-mini)
-    async expandArticle(title, summary, category) {
-        const categoryInfo = {
-            economy: '경제/금융',
-            politics: '국제정치/외교',
-            law: '법률/규제',
-            health: '의료/보건',
-            tech: '기술/IT'
-        };
-        
-        const prompt = `You are a Reuters/Bloomberg professional journalist.
+    // 직접 텍스트로 기사 생성
+    async createArticleFromText(title, content, isKorean = false) {
+        const prompt = isKorean 
+            ? `다음 한국어 기사를 통번역 학습용으로 변환해주세요.
 
-Write a 350-450 word English news article for translation practice.
+제목: ${title}
+내용: ${content}
 
-Title: ${title}
-Summary: ${summary}
-Category: ${categoryInfo[category] || category}
+작업:
+1. 영어로 번역 (350-450 단어, Reuters 스타일)
+2. 원본 한국어 다듬기
+3. 핵심 용어 5개
 
-Requirements:
-1. Formal journalistic English
-2. Include specific numbers, dates, expert quotes
-3. Structure: Lead → Body → Expert quote → Outlook
-4. Use advanced vocabulary for translation exams
-
-Respond with JSON only:
+JSON 형식:
 {
-  "content": "Full article (350-450 words)",
-  "koreanContent": "같은 내용의 한국어 번역 (통번역 학습용)",
-  "level": "intermediate|advanced|expert",
-  "keyTerms": [
-    {"en": "term1", "ko": "용어1"},
-    {"en": "term2", "ko": "용어2"},
-    {"en": "term3", "ko": "용어3"},
-    {"en": "term4", "ko": "용어4"},
-    {"en": "term5", "ko": "용어5"}
-  ]
+  "title": "영어 제목",
+  "content": "영어 본문",
+  "koreanContent": "한국어 본문",
+  "summary": "요약",
+  "category": "economy|politics|tech|health|science",
+  "level": "advanced",
+  "keyTerms": [{"en": "term", "ko": "용어"}]
+}`
+            : `다음 영어 기사를 통번역 학습용으로 변환해주세요.
+
+제목: ${title}
+내용: ${content}
+
+작업:
+1. 영어 본문 다듬기 (350-450 단어)
+2. 전문적인 한국어 번역
+3. 핵심 용어 5개
+
+JSON 형식:
+{
+  "title": "영어 제목",
+  "content": "영어 본문",
+  "koreanContent": "한국어 번역",
+  "summary": "요약",
+  "category": "economy|politics|tech|health|science",
+  "level": "advanced",
+  "keyTerms": [{"en": "term", "ko": "용어"}]
 }`;
 
         try {
@@ -261,7 +255,7 @@ Respond with JSON only:
             }
             throw new Error('기사 생성 실패');
         } catch (error) {
-            console.error('Article expansion error:', error);
+            console.error('Article creation error:', error);
             return null;
         }
     },
