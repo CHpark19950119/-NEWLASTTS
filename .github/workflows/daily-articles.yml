@@ -1,10 +1,16 @@
-name: Daily Articles Update
+name: Daily Article Update
 
 on:
+  # 매일 오전 7시 (KST) = UTC 22:00 전날
   schedule:
-    # 매일 한국시간 오전 7시 (UTC 22:00)
     - cron: '0 22 * * *'
-  workflow_dispatch: # 수동 실행 가능
+  
+  # 수동 트리거 (앱 버튼에서 호출)
+  repository_dispatch:
+    types: [update-articles]
+  
+  # GitHub에서 수동 실행
+  workflow_dispatch:
 
 jobs:
   update-articles:
@@ -13,30 +19,27 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
-        
+      
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: '20'
-          
+      
       - name: Install dependencies
-        run: npm install axios xml2js
-        
-      - name: Generate articles from RSS feeds
-        env:
-          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
-        run: node scripts/generate-articles.js
-        
-      - name: Check for changes
-        id: git-check
         run: |
-          git diff --exit-code data/articles.json || echo "changed=true" >> $GITHUB_OUTPUT
-          
-      - name: Commit and push if changed
-        if: steps.git-check.outputs.changed == 'true'
+          cd scripts
+          npm init -y
+          npm install node-fetch@2
+      
+      - name: Generate articles
+        env:
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+        run: node scripts/generate-articles.js
+      
+      - name: Commit and push
         run: |
           git config --local user.email "action@github.com"
           git config --local user.name "GitHub Action"
           git add data/articles.json
-          git commit -m "📰 Daily articles update - $(date +'%Y-%m-%d')"
+          git diff --staged --quiet || git commit -m "📰 Auto-update articles $(date +'%Y-%m-%d')"
           git push
