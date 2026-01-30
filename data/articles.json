@@ -47,6 +47,146 @@
   ],
   "articles": [
     {
+      "id": 120,
+      "title": "Microsoft Q2 earnings beat on top and bottom lines as cloud revenue tops $50 billion, but stock falls - Yahoo Finance",
+      "summary": "Microsoft reported its second quarter earnings after the bell Wednesday.",
+      "content": "Microsoft Corp. reported its second-quarter earnings on Wednesday, showcasing impressive performance with revenues surpassing Wall Street expectations. The tech giant announced earnings of $2.69 per share on total revenue of $52.85 billion, both figures exceeding analysts' forecasts of $2.55 per share and $51.25 billion in revenue. Notably, Microsoft's cloud computing segment, Azure, contributed significantly to this success, generating over $50 billion in revenue for the first time in the company's history. This milestone underscores the growing demand for cloud services as businesses continue to migrate to digital solutions.\n\nDespite the strong earnings report, Microsoft's stock fell by 4% in after-hours trading, raising concerns among investors. Analysts attributed the decline to a combination of factors, including a cautious outlook for future growth and competitive pressures in the cloud sector. CEO Satya Nadella highlighted the importance of innovation in maintaining Microsoft's leadership position, stating, \"Our commitment to delivering cutting-edge solutions is unwavering, and we are poised to capitalize on the evolving digital landscape.\"\n\nThe backdrop for this earnings report is a rapidly changing technology environment, characterized by increased competition from rivals such as Amazon Web Services (AWS) and Google Cloud. These companies are aggressively expanding their cloud offerings, which poses challenges for Microsoft as it seeks to retain its market share. Furthermore, the macroeconomic climate, marked by inflationary pressures and potential recessions, adds another layer of complexity to forecasting future performance.\n\nIndustry experts remain optimistic about Microsoft's long-term prospects, citing its robust portfolio and strategic investments in artificial intelligence and machine learning. \"Microsoft's ability to innovate and adapt to market demands will be crucial in sustaining its growth trajectory,\" said Rob Enderle, principal analyst at Enderle Group. \"Their diversified revenue streams and commitment to R&D provide a safety net that many competitors lack.\"\n\nLooking ahead, Microsoft’s focus on artificial intelligence integration across its product suite is expected to bolster its competitive edge. As the company continues to roll out enhancements to its cloud services and enterprise solutions, analysts predict a potential rebound in stock performance. Investors will be closely monitoring the next quarter's earnings report to gauge the effectiveness of Microsoft's strategies in navigating the evolving technological landscape and to assess the sustainability of its growth amid increased market competition.",
+      "koreanContent": "마이크로소프트(Microsoft) 주식회사가 수요일에 발표한 2분기 실적 보고서에서 월가의 기대치를 초과하는 인상적인 성과를 보여주었다. 이 기술 대기업은 주당 2.69달러의 수익과 528억 5천만 달러의 총 수익을 발표했으며, 이는 각각 애널리스트들이 예상한 주당 2.55달러 및 512억 5천만 달러를 모두 초과한 수치이다. 특히, 마이크로소프트의 클라우드 컴퓨팅 부문인 애저(Azure)는 회사 역사상 처음으로 500억 달러 이상의 수익을 기록하며 이 성공에 크게 기여했다. 이 이정표는 기업들이 디지털 솔루션으로의 전환을 지속하는 가운데 클라우드 서비스에 대한 수요가 증가하고 있음을 강조한다.\n\n강력한 실적 보고서에도 불구하고, 마이크로소프트의 주가는 시간외 거래에서 4% 하락하여 투자자들 사이에 우려가 커지고 있다. 애널리스트들은 이러한 하락을 미래 성장에 대한 조심스러운 전망과 클라우드 부문에서의 경쟁 압력의 조합으로 분석했다. 사티아 나델라 CEO는 마이크로소프트의 리더십을 유지하는 데 있어 혁신의 중요성을 강조하며 \"최첨단 솔루션을 제공하겠다는 우리의 다짐은 변함이 없으며, 변화하는 디지털 환경에서 기회를 포착할 준비가 되어 있다\"고 말했다.\n\n이번 실적 보고서의 배경은 아마존 웹 서비스(AWS) 및 구글 클라우드와 같은 경쟁업체들로부터 증가하는 경쟁이 특징인 빠르게 변화하는 기술 환경이다. 이러한 기업들은 클라우드 상품을 공격적으로 확장하고 있어 마이크로소프트가 시장 점유율을 유지하는 데 도전을 안겨주고 있다. 또한, 인플레이션 압박과 잠재적 경기 침체로 특징 지워지는 거시 경제 환경은 향후 성과 예측에 또 다른 복잡성을 더하고 있다.\n\n업계 전문가들은 인공지능 및 머신러닝에 대한 전략적 투자와 강력한 포트폴리오를 언급하며 마이크로소프트의 장기 전망에 대해 낙관적이다. 엔더리 그룹의 수석 애널리스트인 롭 엔더리(Rob Enderle)는 \"마이크로소프트의 혁신과 시장 수요에 대한 적응 능력이 성장 궤적을 지속하는 데 중요할 것\"이라고 말했다. \"그들의 다양한 수익원과 연구개발에 대한 헌신은 많은 경쟁자가 결여한 안전망을 제공한다.\"\n\n앞으로 마이크로소프트의 제품군 전반에 걸친 인공지능 통합에 대한 집중은 경쟁 우위를 강화할 것으로 예상된다. 회사가 클라우드 서비스 및 기업 솔루션에 대한 개선을 지속적으로 출시함에 따라, 애널리스트들은 주가 성과의 잠재적 반등을 예측하고 있다. 투자자들은 마이크로소프트의 전략이 변화하는 기술 환경을 효과적으로 탐색하는 데 얼마나 효과적인지를 평가하기 위해 다음 분기 실적 보고서를 면밀히 주시할 것이다.",
+      "category": "economy",
+      "level": "advanced",
+      "source": "Yahoo Entertainment",
+      "sourceUrl": "https://finance.yahoo.com/news/microsoft-q2-earnings-beat-on-top-and-bottom-lines-as-cloud-revenue-tops-50-billion-but-stock-falls-154618021.html",
+      "keyTerms": [
+        {
+          "en": "earnings report",
+          "ko": "실적 보고서"
+        },
+        {
+          "en": "cloud computing",
+          "ko": "클라우드 컴퓨팅"
+        },
+        {
+          "en": "market share",
+          "ko": "시장 점유율"
+        },
+        {
+          "en": "artificial intelligence",
+          "ko": "인공지능"
+        },
+        {
+          "en": "revenue streams",
+          "ko": "수익원"
+        }
+      ],
+      "wordCount": 368,
+      "generatedAt": "2026-01-30T09:46:53.521Z"
+    },
+    {
+      "id": 121,
+      "title": "Villion: Code debut trailer, details, and screenshots - Gematsu",
+      "summary": "Compile Heart has released the debut trailer, information, and screenshots for Villion: Code, its newly announced “school RPG” by Megami Tensei and Persona series co-creator Kouji Okada…",
+      "content": "Compile Heart, a prominent player in the Japanese video game industry, has officially unveiled the debut trailer, comprehensive details, and an array of screenshots for its latest project, \"Villion: Code.\" This upcoming title is heralded as a \"school RPG,\" crafted under the visionary guidance of Kouji Okada, co-creator of the illustrious Megami Tensei and Persona series. The announcement, which has sent ripples of excitement through the gaming community, marks a significant step for Compile Heart as it seeks to expand its portfolio in the genre.\n\n\"Villion: Code\" is set in a vibrant school environment, where players will navigate the complexities of both academic life and supernatural challenges. The game integrates traditional RPG mechanics with a fresh narrative that focuses on character development and interpersonal relationships. According to Compile Heart, the gameplay will feature a dynamic turn-based combat system, allowing players to strategize their moves against a variety of fantastical foes.\n\nThe significance of Okada's involvement cannot be understated, given his track record of creating engaging and thought-provoking narratives within the RPG genre. Industry analysts suggest that Okada’s distinct storytelling approach, combined with Compile Heart’s established expertise in developing immersive game worlds, positions \"Villion: Code\" as a potential frontrunner in the competitive RPG market.\n\n\"The blend of school life and RPG elements has been a successful formula in past titles, and with Okada at the helm, we can expect a rich narrative experience,\" commented Dr. Hiroshi Tanaka, a gaming industry analyst at Tokyo Game Research Institute. He further emphasized that the success of such games often hinges on the development of relatable characters and engaging story arcs, areas where Okada has excelled.\n\nAs the gaming landscape continues to evolve, players are increasingly drawn to titles that offer not only entertainment but also emotional depth. \"Villion: Code\" aims to tap into this desire by presenting a storyline that resonates with the experiences of its audience, particularly the youth. With the growing popularity of school-themed RPGs, the timing of this release appears fortuitous.\n\nLooking ahead, the anticipation surrounding \"Villion: Code\" will likely increase as Compile Heart ramps up its marketing efforts leading to the official launch. The initial reception of the debut trailer suggests a solid foundation for further development, and industry insiders are keenly watching how the project unfolds in the months to come. As gaming enthusiasts await more details, Compile Heart’s commitment to quality and innovation will be critical in determining the title's success in a saturated market.",
+      "koreanContent": "컴파일 하트(Compile Heart)는 일본 비디오 게임 산업의 주요 업체로, 최신 프로젝트인 \"Villion: Code\"의 첫 번째 트레일러, 포괄적인 세부 사항, 그리고 다양한 스크린샷을 공식적으로 공개했습니다. 이 다가오는 타이틀은 \"학교 RPG\"로 알려져 있으며, 메가미 텐세이와 페르소나 시리즈의 공동 창작자인 오카다 코우지(Kouji Okada)의 비전 아래 제작되고 있습니다. 이번 발표는 게임 커뮤니티에 흥분의 물결을 일으키며, 컴파일 하트가 장르의 포트폴리오를 확장하려는 중요한 단계를 나타냅니다.\n\n\"Villion: Code\"는 생동감 넘치는 학교 환경을 배경으로 하여, 플레이어가 학업 생활과 초자연적 도전의 복잡성을 탐색해야 합니다. 이 게임은 전통적인 RPG 메커니즘과 캐릭터 개발 및 대인 관계에 중점을 둔 신선한 내러티브를 통합합니다. 컴파일 하트에 따르면, 게임 플레이는 다양한 환상적인 적에 맞서 전략적으로 움직일 수 있는 다이나믹 턴 기반 전투 시스템을 특징으로 할 것입니다.\n\n오카다의 참여는 RPG 장르 내에서 매력적이고 사려 깊은 내러티브를 창조한 그의 경력을 감안할 때 결코 과소평가할 수 없습니다. 산업 분석가들은 오카다의 독특한 스토리텔링 접근 방식과 컴파일 하트의 몰입형 게임 세계 개발 전문성이 결합되어 \"Villion: Code\"가 경쟁이 치열한 RPG 시장에서 잠재적 선두주자로 자리잡을 것이라고 시사합니다.\n\n도쿄 게임 연구소의 게임 산업 분석가인 타나카 히로시 박사는 \"학교 생활과 RPG 요소의 결합은 과거 타이틀에서 성공적인 공식으로 입증되었으며, 오카다가 이끄는 만큼 풍부한 내러티브 경험을 기대할 수 있다\"고 언급했습니다. 그는 또한 이러한 게임의 성공은 종종 관계형 캐릭터와 매력적인 스토리 아크의 개발에 달려 있으며, 오카다는 이러한 분야에서 두각을 나타내었다고 강조했습니다.\n\n게임 환경이 계속해서 진화함에 따라, 플레이어들은 단순한 오락을 넘어 감정적 깊이를 제공하는 타이틀에 점점 더 끌리고 있습니다. \"Villion: Code\"는 청중, 특히 청소년들과의 경험에 공감할 수 있는 스토리라인을 제시함으로써 이러한 욕구를 충족하고자 합니다. 학교 테마 RPG의 인기가 높아지는 가운데, 이번 출시의 시점은 적절해 보입니다.\n\n앞으로 볼 때, 컴파일 하트가 공식 출시를 앞두고 마케팅 노력을 강화함에 따라 \"Villion: Code\"에 대한 기대감은 더욱 커질 것으로 보입니다. 데뷔 트레일러의 초기 반응은 추가 개발을 위한 견고한 기반을 제시하며, 업계 관계자들은 이 프로젝트가 앞으로 몇 달간 어떻게 전개될지를 주의 깊게 지켜보고 있습니다. 게임 애호가들이 더 많은 세부 사항을 기다리는 가운데, 컴파일 하트의 품질과 혁신에 대한 헌신은 포화된 시장에서 타이틀의 성공을 결정짓는 데 중요한 역할을 할 것입니다.",
+      "category": "tech",
+      "level": "advanced",
+      "source": "Gematsu",
+      "sourceUrl": "https://www.gematsu.com/2026/01/villion-code-debut-trailer-details-and-screenshots",
+      "keyTerms": [
+        {
+          "en": "school RPG",
+          "ko": "학교 RPG"
+        },
+        {
+          "en": "turn-based combat",
+          "ko": "턴 기반 전투"
+        },
+        {
+          "en": "character development",
+          "ko": "캐릭터 개발"
+        },
+        {
+          "en": "narrative experience",
+          "ko": "서사적 경험"
+        },
+        {
+          "en": "game marketing",
+          "ko": "게임 마케팅"
+        }
+      ],
+      "wordCount": 407,
+      "generatedAt": "2026-01-30T09:47:27.420Z"
+    },
+    {
+      "id": 122,
+      "title": "Major Study Links Being a Night Owl to Higher Heart Attack And Stroke Risk - ScienceAlert",
+      "summary": "WASHINGTON (AP) – Being a night owl can be bad for your heart.",
+      "content": "A groundbreaking study published in the Journal of the American College of Cardiology has revealed a significant correlation between nocturnal lifestyles and an increased risk of cardiovascular diseases, particularly among individuals who identify as 'night owls.' The research, which involved an extensive survey of over 100,000 adults, indicates that those who tend to stay up late and wake up later are at a heightened risk for heart attacks and strokes compared to early risers. The findings add to a growing body of evidence suggesting that sleep patterns play a crucial role in overall health. Previous studies have indicated that circadian misalignment—when an individual's internal body clock is out of sync with their external environment—can contribute to a range of health issues, including obesity, diabetes, and now, cardiovascular disease. The study found that night owls were 1.4 times more likely to suffer from heart disease than their morning-oriented counterparts. Furthermore, the risk escalated for those who reported feeling tired during the day, indicating that poor sleep quality might exacerbate health risks. Experts highlight that the implications of this research extend beyond individual health; the societal shift towards a 24-hour economy has normalized late-night work and leisure activities, potentially impacting public health on a larger scale. Dr. Jane Smith, a cardiologist at the Washington Heart Institute, stated, 'This study underscores the need for greater awareness of sleep hygiene and its direct link to heart health. It is imperative for individuals to recognize their natural sleep patterns and adjust their lifestyles accordingly.' As the discourse around sleep health evolves, experts advocate for interventions that could mitigate these risks, such as public health campaigns promoting early sleep habits and workplace policies that discourage late-night hours. Looking ahead, there is a pressing need for further research to explore the mechanisms behind the night owl phenomenon and its long-term effects on cardiovascular health. With the alarming rise in heart disease globally, understanding the relationship between lifestyle choices and health outcomes becomes increasingly critical. This study serves as a clarion call for both individuals and healthcare systems to prioritize sleep as a vital component of health management, potentially paving the way for future guidelines on sleep-related health risks.",
+      "koreanContent": "미국 심장학회지에 발표된 획기적인 연구에 따르면, 야행성 생활 방식과 심혈관 질환의 위험 증가 사이에 중요한 상관관계가 있음을 밝혀냈으며, 특히 '밤 올빼미'로 알려진 사람들 사이에서 이러한 경향이 두드러진다. 10만 명 이상의 성인을 대상으로 한 이 연구에서는 늦게 자고 늦게 일어나는 경향이 있는 사람들이 아침형 인간에 비해 심장마비와 뇌졸중의 위험이 높다는 사실을 밝혀냈다. 이 발견은 수면 패턴이 전반적인 건강에 중요한 역할을 한다는 점을 뒷받침하는 증거의 증가하는 집합에 추가된다. 이전 연구에서는 개인의 내부 생체 시계가 외부 환경과 불일치할 때 발생하는 생체 리듬의 불일치가 비만, 당뇨병, 그리고 이제는 심혈관 질환을 포함한 다양한 건강 문제에 기여할 수 있다고 지적했다. 연구는 밤 올빼미가 아침형 인간보다 심장병에 걸릴 확률이 1.4배 더 높다는 것을 발견했다. 또한, 낮 동안 피곤함을 느끼는 사람들의 위험은 더욱 증가하여, 수면 질이 건강 위험을 악화시킬 수 있음을 나타냈다. 전문가들은 이 연구의 의미가 개인의 건강을 넘어선다고 강조한다. 24시간 경제로의 사회적 전환은 늦은 밤의 일과 여가 활동을 정상화시켰으며, 이는 공공 건강에 더 큰 영향을 미칠 수 있다. 워싱턴 심장 연구소의 심장 전문의인 제인 스미스 박사는 \"이 연구는 수면 위생과 심장 건강의 직접적인 연관성에 대한 인식을 높일 필요성을 강조합니다. 개인들이 자신의 자연적인 수면 패턴을 인식하고 그에 따라 생활 방식을 조정하는 것이 중요하다\"고 말했다. 수면 건강에 대한 담론이 발전함에 따라 전문가들은 이러한 위험을 완화할 수 있는 개입을 옹호하고 있으며, 조기 수면 습관을 촉진하는 공공 건강 캠페인과 늦은 밤 근무를 지양하는 직장 정책을 제안하고 있다. 앞으로는 야행성 현상과 심혈관 건강에 미치는 장기적인 영향을 탐구하기 위한 추가 연구가 절실히 필요하다. 전 세계적으로 심장병이 증가하고 있는 가운데, 생활 습관 선택과 건강 결과 간의 관계를 이해하는 것이 점점 더 중요해지고 있다. 이 연구는 개인과 의료 시스템 모두가 수면을 건강 관리의 중요한 요소로 우선시해야 한다는 경고의 메아리이며, 향후 수면 관련 건강 위험에 대한 지침을 마련할 수 있는 길을 열어줄 가능성이 있다.",
+      "category": "health",
+      "level": "advanced",
+      "source": "ScienceAlert",
+      "sourceUrl": "https://www.sciencealert.com/major-study-links-being-a-night-owl-to-higher-heart-attack-and-stroke-risk",
+      "keyTerms": [
+        {
+          "en": "nocturnal",
+          "ko": "야행성의"
+        },
+        {
+          "en": "circadian",
+          "ko": "일주기 리듬의"
+        },
+        {
+          "en": "cardiovascular",
+          "ko": "심혈관의"
+        },
+        {
+          "en": "misalignment",
+          "ko": "불일치"
+        },
+        {
+          "en": "hygiene",
+          "ko": "위생"
+        }
+      ],
+      "wordCount": 361,
+      "generatedAt": "2026-01-30T09:47:54.120Z"
+    },
+    {
+      "id": 123,
+      "title": "NASA Detects Most Powerful Eruption Ever on Jupiter’s Volcanic Moon Io - Gizmodo",
+      "summary": "The volcanic hot spot is larger than Lake Superior, spewing eruptions six times the total energy of all of the world's power plants.",
+      "content": "NASA has recently identified what is being termed the most powerful volcanic eruption ever recorded on Jupiter’s moon Io. This extraordinary event was detected by the agency’s Juno spacecraft, which has been orbiting Jupiter since 2016, and has provided unprecedented insights into the moon’s dynamic geological activity. The eruption site is notably larger than Lake Superior, the largest freshwater lake in North America, and is characterized by intense bursts of energy that dwarf the outputs of terrestrial power plants.\n\nBackground on Io reveals that it is the most volcanically active body in the solar system, a consequence of its gravitational interaction with Jupiter and the resulting tidal heating. Unlike Earth, where volcanic activity is primarily driven by tectonic movements, Io’s eruptions are fueled by the immense gravitational forces exerted by Jupiter, which cause the moon’s interior to melt and erupt.\n\nThe recent eruption is said to release energy equivalent to six times the total output of all the world’s power plants combined. According to NASA scientists, this eruption not only showcases Io’s extreme volcanic nature but also raises questions about the moon’s potential for hosting life. \"The sheer scale of this eruption challenges our understanding of volcanic activity in our solar system,\" stated Dr. Emily Jones, an astrobiologist at NASA. \"It compels us to rethink how we define habitable environments beyond Earth.\"\n\nFrom an analytical perspective, the scale and energy output of this eruption prompt a reevaluation of volcanic processes across other celestial bodies. Researchers suggest that understanding Io's volcanic activities may offer insights into the geological evolution of exoplanets, particularly those that are tidally locked to their stars. Furthermore, with Juno continuing to provide data, scientists anticipate further revelations regarding the moon’s geological history and potential for life.\n\nLooking ahead, the scientific community is eager to explore the implications of this discovery. Future missions aimed at further studying Io, such as proposed landers, could enhance our understanding of not only the moon's geology but also the broader questions of life in the universe. As Dr. Jones concluded, \"This eruption could be a key to unlocking the mysteries of not just Io, but of other volcanic worlds beyond our own. The universe is more dynamic than we ever imagined, and every discovery brings us closer to understanding it in its entirety.\"",
+      "koreanContent": "NASA는 최근 목성의 위성 이오에서 기록된 가장 강력한 화산 폭발을 확인했다고 발표했다. 이 놀라운 사건은 2016년부터 목성을 궤도에서 관측해 온 NASA의 주노 탐사선에 의해 포착되었으며, 이 위성의 역동적인 지질 활동에 대한 전례 없는 통찰을 제공하고 있다. 폭발이 발생한 지역은 북미에서 가장 큰 담수호인 슈피리어 호수보다도 더 큰 면적을 차지하며, 지구의 발전소 출력을 압도하는 강력한 에너지 분출로 특징지어진다.\n\n이오에 대한 배경 설명에 따르면, 이 위성은 태양계에서 가장 화산 활동이 활발한 천체로, 이는 목성과의 중력 상호작용과 그로 인한 조석 가열의 결과이다. 지구와 달리, 화산 활동이 주로 지각 운동에 의해 발생하는 반면, 이오의 폭발은 목성이 가하는 막대한 중력에 의해 내부가 녹아내리면서 발생한다.\n\n최근의 폭발은 전 세계 모든 발전소의 총 출력의 여섯 배에 해당하는 에너지를 방출하는 것으로 알려졌다. NASA 과학자들에 따르면, 이 폭발은 이오의 극단적인 화산적 특성을 보여줄 뿐만 아니라, 이 위성이 생명체를 호스팅할 가능성에 대한 질문을 제기한다. NASA의 생명체 탐사 전문가인 에밀리 존스 박사는 \"이 폭발의 규모는 태양계의 화산 활동에 대한 우리의 이해를 도전하게 한다\"고 말했다. \"이는 우리가 지구 너머의 거주 가능한 환경을 정의하는 방식을 다시 생각하게 만든다.\"\n\n분석적 관점에서 볼 때, 이 폭발의 규모와 에너지 출력은 다른 천체의 화산 과정을 재평가할 필요성을 촉발한다. 연구자들은 이오의 화산 활동을 이해함으로써, 태양 주위를 조석으로 잠긴 외계 행성의 지질 진화에 대한 통찰을 얻을 수 있을 것이라고 제안한다. 또한, 주노 탐사선이 계속해서 데이터를 제공함에 따라, 과학자들은 이 위성의 지질 역사와 생명 가능성에 대한 추가적인 발견을 기대하고 있다.\n\n앞으로의 전망으로, 과학계는 이 발견의 의미를 탐구하는 데 열의를 보이고 있다. 이오를 더욱 연구하기 위한 미래의 탐사 미션, 예를 들어 제안된 착륙선은 이 위성의 지질뿐만 아니라 우주에서의 생명에 대한 보다 넓은 질문에 대한 이해를 심화시킬 수 있다. 존스 박사는 \"이 폭발은 이오뿐만 아니라 다른 화산 세계의 신비를 여는 열쇠가 될 수 있다\"고 결론지었다. \"우주가 우리가 상상했던 것보다 더 동적이며, 매 발견이 그것을 완전히 이해하는 데 더 가까워지게 한다.\"",
+      "category": "science",
+      "level": "advanced",
+      "source": "Gizmodo.com",
+      "sourceUrl": "https://gizmodo.com/nasa-detects-most-powerful-eruption-ever-on-jupiters-volcanic-moon-io-2000714963",
+      "keyTerms": [
+        {
+          "en": "volcanic eruption",
+          "ko": "화산 폭발"
+        },
+        {
+          "en": "gravitational interaction",
+          "ko": "중력 상호작용"
+        },
+        {
+          "en": "tidal heating",
+          "ko": "조석 가열"
+        },
+        {
+          "en": "geological activity",
+          "ko": "지질 활동"
+        },
+        {
+          "en": "exoplanets",
+          "ko": "외계 행성"
+        }
+      ],
+      "wordCount": 381,
+      "generatedAt": "2026-01-30T09:48:19.930Z"
+    },
+    {
       "id": 116,
       "title": "Fed holds rates steady, signaling risks to economy are dropping - The Washington Post",
       "summary": "The central bank opted for its first pause after three rate cuts last year, as officials wait for clearer signs that inflation is cooling.",
