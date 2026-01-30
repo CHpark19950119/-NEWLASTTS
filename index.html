@@ -518,6 +518,55 @@
                 padding: 10px 16px;
                 font-size: 13px;
             }
+            
+            /* 모바일 네비게이션 개선 */
+            .mobile-nav {
+                position: fixed;
+                bottom: 0;
+                left: 0;
+                right: 0;
+                background: var(--bg-primary);
+                border-top: 1px solid var(--border-color);
+                display: flex;
+                justify-content: space-around;
+                padding: 8px 4px;
+                z-index: 1000;
+                box-shadow: 0 -2px 10px rgba(0,0,0,0.1);
+            }
+            .mobile-nav .mnav {
+                flex: 1;
+                background: none;
+                border: none;
+                font-size: 20px;
+                padding: 8px 4px;
+                cursor: pointer;
+                border-radius: 8px;
+                transition: all 0.2s;
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                gap: 2px;
+            }
+            .mobile-nav .mnav::after {
+                content: attr(title);
+                font-size: 9px;
+                color: var(--text-secondary);
+            }
+            .mobile-nav .mnav.active {
+                background: var(--accent-primary);
+                color: white;
+            }
+            .mobile-nav .mnav.active::after {
+                color: white;
+            }
+            .mobile-nav .mnav:hover {
+                background: var(--bg-tertiary);
+            }
+            
+            /* 메인 컨텐츠 하단 여백 */
+            .main-content {
+                padding-bottom: 80px !important;
+            }
         }
     </style>
 </head>
@@ -597,11 +646,13 @@
 
         <!-- 모바일 네비게이션 -->
         <nav class="mobile-nav">
-            <button class="mnav active" data-view="dashboard">🏠</button>
-            <button class="mnav" data-view="articles">📰</button>
-            <button class="mnav" data-view="translate">✍️</button>
-            <button class="mnav" data-view="vocabulary">📚</button>
-            <button class="mnav" data-view="settings">⚙️</button>
+            <button class="mnav active" data-view="dashboard" title="홈">🏠</button>
+            <button class="mnav" data-view="articles" title="기사">📰</button>
+            <button class="mnav" data-view="translate" title="번역">✍️</button>
+            <button class="mnav" data-view="interpret" title="통역">🎙️</button>
+            <button class="mnav" data-view="vocabulary" title="단어장">📚</button>
+            <button class="mnav" data-view="archive" title="아카이브">📁</button>
+            <button class="mnav" data-view="settings" title="설정">⚙️</button>
         </nav>
 
         <main class="main-content">
@@ -1217,16 +1268,6 @@
                             <button class="btn btn-danger" onclick="resetData()">🗑️ 데이터 초기화</button>
                         </div>
                     </div>
-
-                    <!-- 공유 카드 생성 -->
-                    <div class="settings-card wide">
-                        <h3>📱 학습 카드 생성</h3>
-                        <p>나의 학습 통계를 예쁜 카드로 만들어 공유하세요!</p>
-                        <div class="share-card-preview" id="share-card-preview">
-                            <!-- 동적 생성 -->
-                        </div>
-                        <button class="btn btn-primary" onclick="generateShareCard()">🎨 카드 생성하기</button>
-                    </div>
                 </div>
             </section>
         </main>
@@ -1410,23 +1451,6 @@
             </div>
             <p class="levelup-title" id="levelup-title">번역 수습생</p>
             <button class="btn btn-primary" onclick="closeLevelupModal()">확인</button>
-        </div>
-    </div>
-
-    <!-- 공유 카드 모달 -->
-    <div class="modal" id="share-modal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h3>📱 학습 카드</h3>
-                <button class="modal-close" onclick="closeShareModal()">×</button>
-            </div>
-            <div class="modal-body">
-                <div id="share-card-container"></div>
-            </div>
-            <div class="modal-footer">
-                <button class="btn btn-secondary" onclick="downloadShareCard()">📥 이미지 저장</button>
-                <button class="btn btn-primary" onclick="copyShareCard()">📋 복사</button>
-            </div>
         </div>
     </div>
 

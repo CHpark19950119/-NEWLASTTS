@@ -9,12 +9,22 @@ const App = {
 };
 
 // Storage 확장 (기존 Storage 객체에 함수 추가)
-if (typeof Storage !== 'undefined') {
+// storage.js가 로드된 후에 실행되어야 함
+function extendStorage() {
+    if (typeof Storage === 'undefined' || Storage === null) {
+        console.warn('Storage 객체가 없습니다. 기본 객체 생성');
+        window.Storage = {};
+    }
+    
     // 기사 진행도 저장
     Storage.saveArticleProgress = function(articleId, completed, total) {
-        const progress = this.getArticleProgress();
-        progress[articleId] = { completed, total, updatedAt: new Date().toISOString() };
-        localStorage.setItem('articleProgress', JSON.stringify(progress));
+        try {
+            const progress = this.getArticleProgress();
+            progress[articleId] = { completed, total, updatedAt: new Date().toISOString() };
+            localStorage.setItem('articleProgress', JSON.stringify(progress));
+        } catch (e) {
+            console.error('진행도 저장 실패:', e);
+        }
     };
     
     // 기사 진행도 가져오기
@@ -26,53 +36,58 @@ if (typeof Storage !== 'undefined') {
         }
     };
     
-    // 아카이브 추가 (기존 함수 없으면 추가)
-    if (!Storage.addArchive) {
-        Storage.addArchive = function(data) {
-            try {
-                const archives = JSON.parse(localStorage.getItem('archives') || '[]');
-                data.id = Date.now();
-                data.date = data.date || new Date().toISOString();
-                archives.unshift(data);
-                localStorage.setItem('archives', JSON.stringify(archives.slice(0, 100)));
-                console.log('✅ Storage.addArchive 성공:', data.id);
-                return true;
-            } catch (e) {
-                console.error('❌ Storage.addArchive 실패:', e);
-                return false;
-            }
-        };
-    }
+    // 아카이브 추가
+    const originalAddArchive = Storage.addArchive;
+    Storage.addArchive = function(data) {
+        try {
+            const archives = JSON.parse(localStorage.getItem('archives') || '[]');
+            data.id = Date.now();
+            data.date = data.date || new Date().toISOString();
+            archives.unshift(data);
+            localStorage.setItem('archives', JSON.stringify(archives.slice(0, 100)));
+            console.log('✅ 아카이브 저장 성공:', data.type, data.articleTitle);
+            return true;
+        } catch (e) {
+            console.error('❌ 아카이브 저장 실패:', e);
+            return false;
+        }
+    };
     
     // 아카이브 가져오기
-    if (!Storage.getArchive) {
-        Storage.getArchive = function() {
-            try {
-                return JSON.parse(localStorage.getItem('archives') || '[]');
-            } catch (e) {
-                return [];
-            }
-        };
-    }
+    const originalGetArchive = Storage.getArchive;
+    Storage.getArchive = function() {
+        try {
+            const data = JSON.parse(localStorage.getItem('archives') || '[]');
+            console.log('📚 아카이브 로드:', data.length, '개');
+            return data;
+        } catch (e) {
+            console.error('아카이브 로드 실패:', e);
+            return [];
+        }
+    };
     
     // 아카이브 업데이트
-    if (!Storage.updateArchiveItem) {
-        Storage.updateArchiveItem = function(id, updates) {
-            try {
-                const archives = this.getArchive();
-                const index = archives.findIndex(a => a.id === id);
-                if (index !== -1) {
-                    archives[index] = { ...archives[index], ...updates };
-                    localStorage.setItem('archives', JSON.stringify(archives));
-                    return true;
-                }
-                return false;
-            } catch (e) {
-                return false;
+    Storage.updateArchiveItem = function(id, updates) {
+        try {
+            const archives = this.getArchive();
+            const index = archives.findIndex(a => a.id === id);
+            if (index !== -1) {
+                archives[index] = { ...archives[index], ...updates };
+                localStorage.setItem('archives', JSON.stringify(archives));
+                return true;
             }
-        };
-    }
+            return false;
+        } catch (e) {
+            console.error('아카이브 업데이트 실패:', e);
+            return false;
+        }
+    };
+    
+    console.log('✅ Storage 확장 완료');
 }
+
+// DOM 로드 전에 실행
+extendStorage();
 
 // ========== 초기화 ==========
 document.addEventListener('DOMContentLoaded', async () => {
@@ -309,8 +324,10 @@ function renderArticles() {
     if (!list.length) { grid.innerHTML = '<div class="empty-state"><p>기사 없음</p></div>'; return; }
     
     // 아카이브에서 진행도 계산
-    const archives = Storage.getArchive() || [];
+    const archives = Storage.getArchive ? Storage.getArchive() : [];
     const articleProgressMap = {};
+    
+    console.log('📊 아카이브 데이터:', archives.length, '개');
     
     archives.forEach(arch => {
         if (arch.articleId) {
@@ -325,11 +342,16 @@ function renderArticles() {
                 articleProgressMap[arch.articleId][type].completed, 
                 arch.completedPhrases || 0
             );
-            articleProgressMap[arch.articleId][type].total = arch.totalPhrases || 0;
+            articleProgressMap[arch.articleId][type].total = Math.max(
+                articleProgressMap[arch.articleId][type].total,
+                arch.totalPhrases || 0
+            );
             articleProgressMap[arch.articleId][type].score += arch.averageScore || 0;
             articleProgressMap[arch.articleId][type].count++;
         }
     });
+    
+    console.log('📊 진행도 맵:', articleProgressMap);
     
     grid.innerHTML = list.map(a => {
         const ci = App.categories.find(c => c.id === a.category) || { icon: '📰', name: a.category };
@@ -339,46 +361,63 @@ function renderArticles() {
             ? '<span class="badge-real" title="실제 기사">✓실제</span>' 
             : (a.source === 'AI Generated' ? '<span class="badge-ai" title="AI 생성">🤖AI</span>' : '');
         
-        // 날짜 포맷
-        const dateStr = a.generatedAt ? formatFullDate(a.generatedAt) : '날짜 없음';
-        
         // 문장 수 계산
         const totalSentences = (a.content || '').match(/[^.!?]+[.!?]+/g)?.length || 1;
         
         // 진행도 계산 (아카이브 기반)
         const progress = articleProgressMap[a.id];
-        let progressHtml = '';
+        
+        // 번역 진행도
+        let transPct = 0, transAvg = 0, transStatus = '미시작';
+        // 통역 진행도  
+        let interpPct = 0, interpAvg = 0, interpStatus = '미시작';
         
         if (progress) {
-            const transProgress = progress.translation;
-            const interpProgress = progress.interpretation;
+            const trans = progress.translation;
+            const interp = progress.interpretation;
             
-            const transCompleted = transProgress.completed;
-            const interpCompleted = interpProgress.completed;
-            const transPct = transProgress.total > 0 ? Math.round((transCompleted / transProgress.total) * 100) : 0;
-            const interpPct = interpProgress.total > 0 ? Math.round((interpCompleted / interpProgress.total) * 100) : 0;
-            const transAvg = transProgress.count > 0 ? Math.round(transProgress.score / transProgress.count) : 0;
-            const interpAvg = interpProgress.count > 0 ? Math.round(interpProgress.score / interpProgress.count) : 0;
+            if (trans.total > 0) {
+                transPct = Math.round((trans.completed / trans.total) * 100);
+                transAvg = trans.count > 0 ? Math.round(trans.score / trans.count) : 0;
+                transStatus = transPct >= 100 ? '완료' : `${transPct}%`;
+            }
             
-            if (transPct > 0 || interpPct > 0) {
-                progressHtml = `<div class="article-progress-section">`;
-                if (transPct > 0) {
-                    progressHtml += `<div class="progress-row">
-                        <span class="progress-label">✍️ 번역</span>
-                        <div class="progress-bar-mini"><div class="progress-fill-mini" style="width:${transPct}%"></div></div>
-                        <span class="progress-text">${transPct}% (${transAvg}점)</span>
-                    </div>`;
-                }
-                if (interpPct > 0) {
-                    progressHtml += `<div class="progress-row">
-                        <span class="progress-label">🎙️ 통역</span>
-                        <div class="progress-bar-mini"><div class="progress-fill-mini" style="width:${interpPct}%"></div></div>
-                        <span class="progress-text">${interpPct}% (${interpAvg}점)</span>
-                    </div>`;
-                }
-                progressHtml += `</div>`;
+            if (interp.total > 0) {
+                interpPct = Math.round((interp.completed / interp.total) * 100);
+                interpAvg = interp.count > 0 ? Math.round(interp.score / interp.count) : 0;
+                interpStatus = interpPct >= 100 ? '완료' : `${interpPct}%`;
             }
         }
+        
+        // 점수 색상 클래스
+        const transScoreClass = transAvg >= 80 ? 'score-high' : transAvg >= 60 ? 'score-mid' : transAvg > 0 ? 'score-low' : '';
+        const interpScoreClass = interpAvg >= 80 ? 'score-high' : interpAvg >= 60 ? 'score-mid' : interpAvg > 0 ? 'score-low' : '';
+        
+        // 진행도 HTML
+        const progressHtml = `
+            <div class="article-progress-section">
+                <div class="progress-row">
+                    <span class="progress-label">✍️ 번역</span>
+                    <div class="progress-bar-mini">
+                        <div class="progress-fill-mini ${transPct === 0 ? 'empty' : ''}" style="width:${transPct}%"></div>
+                    </div>
+                    <span class="progress-text ${transScoreClass}">
+                        ${transPct > 0 ? `${transStatus} · ${transAvg}점` : '미시작'}
+                    </span>
+                </div>
+                <div class="progress-row">
+                    <span class="progress-label">🎙️ 통역</span>
+                    <div class="progress-bar-mini">
+                        <div class="progress-fill-mini interp ${interpPct === 0 ? 'empty' : ''}" style="width:${interpPct}%"></div>
+                    </div>
+                    <span class="progress-text ${interpScoreClass}">
+                        ${interpPct > 0 ? `${interpStatus} · ${interpAvg}점` : '미시작'}
+                    </span>
+                </div>
+            </div>`;
+        
+        // 날짜/시간
+        const dateInfo = getArticleDateInfo(a.generatedAt);
         
         return `<div class="article-card">
             <div class="article-meta">
@@ -387,15 +426,22 @@ function renderArticles() {
                 ${hasKorean ? '<span title="한영 번역 가능">🇰🇷</span>' : ''}
                 ${sourceTag}
             </div>
-            <h4>${a.title}</h4>
+            <h4 class="article-title">${a.title}</h4>
             <p class="article-summary">${(a.summary || a.content?.substring(0, 100) + '...')}</p>
             ${progressHtml}
-            <div class="article-footer">
-                <span class="article-date">📅 ${dateStr}</span>
-                <span>${a.wordCount || '-'}단어 · ${totalSentences}문장</span>
+            <div class="article-info">
+                <div class="article-date-time">
+                    <span class="date-icon">🕐</span>
+                    <span class="date-full">${dateInfo.full}</span>
+                    <span class="date-relative">${dateInfo.relative}</span>
+                </div>
+                <div class="article-stats">
+                    <span>📝 ${a.wordCount || '-'}단어</span>
+                    <span>📄 ${totalSentences}문장</span>
+                </div>
             </div>
             <div class="article-actions">
-                <button class="btn btn-sm btn-secondary" onclick="event.stopPropagation(); showArticleDetail(${a.id})">📖 원문보기</button>
+                <button class="btn btn-sm btn-secondary" onclick="event.stopPropagation(); showArticleDetail(${a.id})">📖 원문</button>
                 <button class="btn btn-sm btn-primary" onclick="event.stopPropagation(); startTranslate(${a.id})">✍️ 번역</button>
                 <button class="btn btn-sm btn-accent" onclick="event.stopPropagation(); startInterpret(${a.id})">🎙️ 통역</button>
             </div>
@@ -403,10 +449,77 @@ function renderArticles() {
     }).join('');
 }
 
+// 기사 날짜 정보
+function getArticleDateInfo(dateStr) {
+    if (!dateStr) {
+        return { full: '날짜 없음', relative: '' };
+    }
+    
+    const date = new Date(dateStr);
+    const now = new Date();
+    const diff = now - date;
+    
+    // 전체 날짜/시간
+    const full = date.toLocaleString('ko-KR', {
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit'
+    });
+    
+    // 상대 시간
+    const minutes = Math.floor(diff / 60000);
+    const hours = Math.floor(diff / 3600000);
+    const days = Math.floor(diff / 86400000);
+    
+    let relative = '';
+    if (minutes < 1) relative = '방금 전';
+    else if (minutes < 60) relative = `${minutes}분 전`;
+    else if (hours < 24) relative = `${hours}시간 전`;
+    else if (days < 7) relative = `${days}일 전`;
+    else if (days < 30) relative = `${Math.floor(days / 7)}주 전`;
+    else if (days < 365) relative = `${Math.floor(days / 30)}개월 전`;
+    else relative = `${Math.floor(days / 365)}년 전`;
+    
+    return { full, relative: `(${relative})` };
+}
+
 function formatFullDate(d) {
     if (!d) return '';
     const date = new Date(d);
     return date.toLocaleDateString('ko-KR', { year: 'numeric', month: 'short', day: 'numeric' });
+}
+
+function formatDateTime(d) {
+    if (!d) return '';
+    const date = new Date(d);
+    const now = new Date();
+    const diffMs = now - date;
+    const diffMins = Math.floor(diffMs / 60000);
+    const diffHours = Math.floor(diffMs / 3600000);
+    const diffDays = Math.floor(diffMs / 86400000);
+    
+    // 1시간 이내
+    if (diffMins < 60) {
+        return diffMins <= 1 ? '방금 전' : diffMins + '분 전';
+    }
+    // 24시간 이내
+    if (diffHours < 24) {
+        return diffHours + '시간 전';
+    }
+    // 7일 이내
+    if (diffDays < 7) {
+        return diffDays + '일 전';
+    }
+    // 그 외
+    return date.toLocaleDateString('ko-KR', { 
+        year: 'numeric', 
+        month: 'short', 
+        day: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit'
+    });
 }
 
 // 기사 선택 (기본: 번역으로 이동)
