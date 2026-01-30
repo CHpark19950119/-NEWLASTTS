@@ -1,11 +1,8 @@
 // ===== DAYOUNG's 통번역 스튜디오 v3 - API Module =====
 
 const API = {
-    // AI 모델 엔드포인트
-    ENDPOINTS: {
-        claude: 'https://api.anthropic.com/v1/messages',
-        gpt: 'https://api.openai.com/v1/chat/completions'
-    },
+    // Google Cloud 프록시 URL
+    PROXY_URL: 'https://claude-proxy-957117035071.us-central1.run.app',
     
     // 현재 선택된 모델로 AI 요청
     async callAI(prompt, systemPrompt = '') {
@@ -23,20 +20,21 @@ const API = {
         }
     },
     
-    // Claude API 호출
+    // Claude API 호출 (Google Cloud Proxy 사용)
     async callClaude(apiKey, prompt, systemPrompt = '') {
-        const response = await fetch(this.ENDPOINTS.claude, {
+        const response = await fetch(this.PROXY_URL, {
             method: 'POST',
             headers: {
-                'Content-Type': 'application/json',
-                'x-api-key': apiKey,
-                'anthropic-version': '2023-06-01'
+                'Content-Type': 'application/json'
             },
             body: JSON.stringify({
+                provider: 'claude',
+                apiKey: apiKey,
                 model: 'claude-3-haiku-20240307',
                 max_tokens: 2000,
-                system: systemPrompt || '당신은 한영/영한 번역 전문가입니다. 친절하고 정확하게 피드백을 제공합니다.',
-                messages: [{ role: 'user', content: prompt }]
+                messages: [
+                    { role: 'user', content: (systemPrompt || '당신은 한영/영한 번역 전문가입니다. 친절하고 정확하게 피드백을 제공합니다.') + '\n\n' + prompt }
+                ]
             })
         });
         
@@ -49,21 +47,22 @@ const API = {
         return data.content[0].text;
     },
     
-    // GPT API 호출
+    // GPT API 호출 (Google Cloud Proxy 사용)
     async callGPT(apiKey, prompt, systemPrompt = '') {
-        const response = await fetch(this.ENDPOINTS.gpt, {
+        const response = await fetch(this.PROXY_URL, {
             method: 'POST',
             headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${apiKey}`
+                'Content-Type': 'application/json'
             },
             body: JSON.stringify({
+                provider: 'gpt',
+                apiKey: apiKey,
                 model: 'gpt-4o-mini',
+                max_tokens: 2000,
                 messages: [
                     { role: 'system', content: systemPrompt || '당신은 한영/영한 번역 전문가입니다. 친절하고 정확하게 피드백을 제공합니다.' },
                     { role: 'user', content: prompt }
-                ],
-                max_tokens: 2000
+                ]
             })
         });
         
@@ -158,14 +157,10 @@ ${userInterpretation}
     
     // RSS에서 기사 가져오기 (프록시 필요)
     async fetchArticlesFromRSS() {
-        // 참고: CORS 문제로 클라이언트에서 직접 RSS 호출은 어려움
-        // GitHub Actions에서 처리하거나 프록시 서버 필요
         const feeds = [
             { url: 'https://feeds.reuters.com/reuters/businessNews', category: 'economy', source: 'Reuters' },
             { url: 'https://feeds.bbci.co.uk/news/world/rss.xml', category: 'politics', source: 'BBC' }
         ];
-        
-        // 실제 구현시에는 프록시 서버나 서버리스 함수 사용
         return [];
     },
     
@@ -243,15 +238,12 @@ const TTS = {
     
     speak(text, lang = 'en-US', rate = 0.9) {
         this.stop();
-        
         const utterance = new SpeechSynthesisUtterance(text);
         utterance.lang = lang;
         utterance.rate = rate;
-        
         utterance.onstart = () => { this.speaking = true; };
         utterance.onend = () => { this.speaking = false; };
         utterance.onerror = () => { this.speaking = false; };
-        
         speechSynthesis.speak(utterance);
     },
     
@@ -287,26 +279,13 @@ const STT = {
                 return;
             }
         }
-        
         this.recognition.lang = lang;
-        
         this.recognition.onresult = (event) => {
-            const transcript = Array.from(event.results)
-                .map(result => result[0].transcript)
-                .join('');
+            const transcript = Array.from(event.results).map(result => result[0].transcript).join('');
             onResult(transcript, event.results[0].isFinal);
         };
-        
-        this.recognition.onend = () => {
-            this.isListening = false;
-            if (onEnd) onEnd();
-        };
-        
-        this.recognition.onerror = (event) => {
-            console.error('STT Error:', event.error);
-            this.isListening = false;
-        };
-        
+        this.recognition.onend = () => { this.isListening = false; if (onEnd) onEnd(); };
+        this.recognition.onerror = (event) => { console.error('STT Error:', event.error); this.isListening = false; };
         this.recognition.start();
         this.isListening = true;
     },
@@ -323,8 +302,6 @@ const STT = {
 const BGM = {
     audio: null,
     currentTrack: null,
-    
-    // 무료 BGM URL들 (실제 서비스에서는 자체 호스팅 권장)
     tracks: {
         lofi: 'https://cdn.pixabay.com/download/audio/2022/05/27/audio_1808fbf07a.mp3',
         jazz: 'https://cdn.pixabay.com/download/audio/2022/10/25/audio_946b0939c5.mp3',
@@ -334,13 +311,9 @@ const BGM = {
     },
     
     play(trackName) {
-        if (this.audio) {
-            this.audio.pause();
-        }
-        
+        if (this.audio) this.audio.pause();
         const url = this.tracks[trackName];
         if (!url) return;
-        
         this.audio = new Audio(url);
         this.audio.loop = true;
         this.audio.volume = 0.3;
@@ -349,17 +322,11 @@ const BGM = {
     },
     
     stop() {
-        if (this.audio) {
-            this.audio.pause();
-            this.audio = null;
-            this.currentTrack = null;
-        }
+        if (this.audio) { this.audio.pause(); this.audio = null; this.currentTrack = null; }
     },
     
     setVolume(volume) {
-        if (this.audio) {
-            this.audio.volume = volume / 100;
-        }
+        if (this.audio) this.audio.volume = volume / 100;
     },
     
     isPlaying() {
