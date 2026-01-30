@@ -166,41 +166,10 @@ const API = {
         }
     },
     
-    // URL에서 기사 추출 및 변환
+    // URL은 브라우저에서 직접 접근 불가 (CORS)
+    // 대신 사용자가 기사 내용을 복사해서 붙여넣도록 안내
     async extractArticleFromURL(url) {
-        const prompt = `다음 URL의 뉴스 기사를 분석하여 통번역 학습용 자료로 만들어주세요.
-
-URL: ${url}
-
-작업:
-1. 기사 제목과 본문을 영어로 작성 (350-450 단어)
-2. 전문적인 한국어 번역 제공
-3. 핵심 용어 5개 추출
-
-JSON 형식으로 응답:
-{
-  "title": "영어 제목",
-  "content": "영어 본문 (350-450 words)",
-  "koreanContent": "한국어 번역 전문",
-  "summary": "2-3문장 요약",
-  "category": "economy|politics|tech|health|science",
-  "level": "advanced",
-  "keyTerms": [
-    {"en": "term", "ko": "용어"}
-  ]
-}`;
-
-        try {
-            const response = await this.callGPT(prompt);
-            const jsonMatch = response.match(/\{[\s\S]*\}/);
-            if (jsonMatch) {
-                return JSON.parse(jsonMatch[0]);
-            }
-            throw new Error('기사 추출 실패');
-        } catch (error) {
-            console.error('URL extraction error:', error);
-            return null;
-        }
+        throw new Error('URL 직접 접근 불가. 기사 내용을 복사해서 "직접 입력"을 사용하세요.');
     },
     
     // 직접 텍스트로 기사 생성

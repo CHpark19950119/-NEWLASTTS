@@ -467,64 +467,25 @@ async function updateFromRSS() {
     }
 }
 
-// URL에서 기사 추가
+// URL에서 기사 추가 (복사/붙여넣기 안내)
 function updateFromURL() {
     const formArea = document.getElementById('update-form-area');
     formArea.style.display = 'block';
     formArea.innerHTML = `
-        <div class="form-group">
-            <label>뉴스 기사 URL</label>
-            <input type="url" id="article-url" placeholder="https://..." style="width:100%;padding:12px;border-radius:8px;border:1px solid var(--border-color);">
+        <div style="background: #fff3cd; padding: 12px; border-radius: 8px; margin-bottom: 16px;">
+            <p style="margin:0; color: #856404;">
+                ⚠️ <strong>브라우저 보안 제한</strong>으로 URL 직접 접근이 불가합니다.<br>
+                기사 페이지에서 <strong>제목과 본문을 복사</strong>해서 "직접 입력"을 사용하세요.
+            </p>
         </div>
-        <button class="btn btn-primary" onclick="processArticleURL()" style="margin-top:12px;">
-            🔍 기사 추출 및 추가
+        <button class="btn btn-primary" onclick="updateManual()">
+            ✍️ 직접 입력으로 이동
         </button>
     `;
 }
 
 async function processArticleURL() {
-    const url = document.getElementById('article-url').value.trim();
-    if (!url) { showToast('URL을 입력하세요', 'warning'); return; }
-    
-    showLoading(true, 'URL에서 기사 추출 중...');
-    
-    try {
-        const article = await API.extractArticleFromURL(url);
-        
-        if (article && article.content) {
-            // 로컬에 기사 추가
-            const newId = Math.max(0, ...App.articles.map(a => a.id || 0)) + 1;
-            const newArticle = {
-                id: newId,
-                title: article.title,
-                summary: article.summary,
-                content: article.content,
-                koreanContent: article.koreanContent || '',
-                category: article.category || 'economy',
-                level: article.level || 'advanced',
-                source: 'URL Import',
-                sourceUrl: url,
-                keyTerms: article.keyTerms || [],
-                wordCount: article.content.split(/\s+/).length,
-                generatedAt: new Date().toISOString()
-            };
-            
-            App.articles.unshift(newArticle);
-            
-            // 로컬 스토리지에 저장
-            Storage.set('customArticles', App.articles.filter(a => a.source === 'URL Import' || a.source === 'Manual Input'));
-            
-            showLoading(false);
-            showToast('✅ 기사 추가 완료!', 'success');
-            closeArticleUpdateModal();
-            renderArticles();
-        } else {
-            throw new Error('기사 추출 실패');
-        }
-    } catch (e) {
-        showLoading(false);
-        showToast('❌ 추출 실패: ' + e.message, 'error');
-    }
+    showToast('URL 직접 접근 불가. "직접 입력"을 사용하세요.', 'warning');
 }
 
 // 직접 입력

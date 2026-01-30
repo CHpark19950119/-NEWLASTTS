@@ -852,18 +852,13 @@
                 <div class="update-options">
                     <div class="update-option" onclick="updateFromRSS()">
                         <div class="opt-icon">📡</div>
-                        <h4>RSS에서 자동 수집</h4>
-                        <p>Reuters, BBC 등에서 최신 기사를 가져옵니다</p>
+                        <h4>NewsAPI 자동 수집</h4>
+                        <p>실제 뉴스에서 최신 기사를 가져옵니다 (GitHub Token 필요)</p>
                     </div>
-                    <div class="update-option" onclick="updateFromURL()">
-                        <div class="opt-icon">🔗</div>
-                        <h4>URL 입력</h4>
-                        <p>특정 기사 URL을 입력하여 추가</p>
-                    </div>
-                    <div class="update-option" onclick="updateManual()">
+                    <div class="update-option" onclick="updateManual()" style="border: 2px solid var(--accent-primary);">
                         <div class="opt-icon">✍️</div>
-                        <h4>직접 입력</h4>
-                        <p>기사 내용을 직접 입력</p>
+                        <h4>⭐ 직접 입력 (추천)</h4>
+                        <p>기사 제목과 본문을 복사/붙여넣기</p>
                     </div>
                 </div>
                 <div id="update-form-area" style="display:none;">
